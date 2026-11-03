@@ -7,6 +7,7 @@ XClassics 荷马史诗三语对读 —— 独立网页构建脚本
 """
 import json
 import os
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,6 +18,11 @@ FILES = {
 TEMPLATE = os.path.join(HERE, 'reader_template.html')
 OUTPUT = os.path.join(HERE, '荷马史诗三语对读.html')
 PLACEHOLDER = '__EPIC_DATA__'
+
+
+def read_version(template):
+    m = re.search(r'<meta\s+name="version"\s+content="([^"]+)"', template)
+    return m.group(1) if m else 'unknown'
 
 
 def main():
@@ -35,6 +41,8 @@ def main():
     with open(TEMPLATE, encoding='utf-8') as f:
         template = f.read()
 
+    version = read_version(template)
+
     assert PLACEHOLDER in template, '模板中未找到占位符 ' + PLACEHOLDER
     out = template.replace(PLACEHOLDER, blob)
 
@@ -42,7 +50,7 @@ def main():
         f.write(out)
 
     size_kb = os.path.getsize(OUTPUT) / 1024
-    print(f'[done] 生成 {OUTPUT}  ({size_kb:.1f} KB)')
+    print(f'[done] XCReaderEpics {version} -> {OUTPUT}  ({size_kb:.1f} KB)')
 
 
 if __name__ == '__main__':
