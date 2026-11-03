@@ -2,29 +2,34 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>荷马史诗 · 三语对读</title>
+<meta name="description" content="XClassics 荷马史诗三语对读阅读器：古希腊语原文、英译、中译逐行对照阅读《伊利亚特》与《奥德赛》，单文件离线可用。">
+<meta name="theme-color" content="#2c3e50">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232c3e50'/%3E%3Ctext x='32' y='47' font-size='38' font-family='Palatino,Georgia,serif' text-anchor='middle' fill='%23c9a86a'%3E%CE%91%3C/text%3E%3C/svg%3E">
 <style>
 :root {
     --font-size: 16px;
+    --font-size-gr: 17px;
     --line-height: 1.85;
     --font-zh: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    --font-en: "Georgia", "Times New Roman", serif;
-    --font-gr: "Palatino Linotype", "GFS Didot", "Times New Roman", serif;
+    --font-en: "Iowan Old Style", "Georgia", "Times New Roman", serif;
+    --font-gr: "GFS Didot", "Palatino", "Hoefler Text", "Baskerville", "Times New Roman", serif;
 
     --bg: #f6f4f0;
     --surface: #ffffff;
     --surface-2: #fbfaf8;
     --text: #2b2a28;
-    --text-dim: #8b857c;
+    --text-dim: #6b6559;
     --accent: #2c3e50;
     --accent-soft: #3d5a75;
     --border: #e7e2da;
+    --border-strong: #d6cfc4;
     --zebra: rgba(0, 0, 0, 0.035);
     --mark: #ffd54f;
     --mark-text: #2b2a28;
     --flash: #fff3bf;
-    --ln: #b3aca0;
+    --ln: #7b7466;
     --header-bg: #2c3e50;
     --header-fg: #f2efe9;
     --header-dim: #b8c4cf;
@@ -32,21 +37,23 @@
     --resizer-active: #4a6fa5;
     --shadow: 0 6px 24px rgba(0,0,0,.12);
     --card-shadow: 0 4px 20px rgba(0,0,0,.08);
+    --measure: 34em;
 }
 [data-theme="dark"] {
     --bg: #191b1f;
     --surface: #212328;
     --surface-2: #26282e;
     --text: #d9d5cc;
-    --text-dim: #8b857a;
+    --text-dim: #a8a196;
     --accent: #c9a86a;
     --accent-soft: #d8bc86;
     --border: #35373d;
+    --border-strong: #454851;
     --zebra: rgba(255, 255, 255, 0.045);
     --mark: #7a5c00;
     --mark-text: #ffe9a8;
     --flash: #4a3f14;
-    --ln: #6f6a60;
+    --ln: #948d81;
     --header-bg: #14161a;
     --header-fg: #e8e4dc;
     --header-dim: #8b929c;
@@ -68,11 +75,15 @@ body {
     line-height: var(--line-height);
     -webkit-font-smoothing: antialiased;
 }
-
 button, select, input {
     font-family: inherit;
     font-size: 14px;
     color: inherit;
+}
+button { -webkit-tap-highlight-color: transparent; }
+:focus-visible {
+    outline: 2px solid var(--resizer-active);
+    outline-offset: 2px;
 }
 
 /* ============ 首页 ============ */
@@ -128,7 +139,8 @@ button, select, input {
     position: relative;
     overflow: hidden;
 }
-.epic-card:hover {
+.epic-card:hover,
+.epic-card:focus-visible {
     transform: translateY(-4px);
     box-shadow: var(--shadow);
     border-color: var(--accent-soft);
@@ -204,13 +216,24 @@ button, select, input {
     color: var(--text-dim);
 }
 .home-foot .usage b { color: var(--text); font-weight: 600; }
+.home-foot kbd {
+    font-family: inherit;
+    font-size: .92em;
+    border: 1px solid var(--border-strong);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 4px;
+    background: var(--surface);
+}
 
 /* ============ 阅读器 ============ */
 #reader-view {
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     background: var(--surface);
+    position: relative;
 }
 #progress-bar {
     position: absolute;
@@ -218,6 +241,7 @@ button, select, input {
     height: 3px;
     width: 0;
     background: var(--accent-soft);
+    border-radius: 0 2px 2px 0;
     z-index: 60;
     transition: width .05s linear;
 }
@@ -232,7 +256,7 @@ header {
     background: var(--header-bg);
     color: var(--header-fg);
     box-shadow: 0 1px 4px rgba(0,0,0,.2);
-    z-index: 20;
+    z-index: 30;
 }
 header .sep {
     width: 1px; height: 22px;
@@ -241,6 +265,7 @@ header .sep {
 .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
     padding: 6px 11px;
     border: 1px solid rgba(255,255,255,.28);
@@ -251,6 +276,7 @@ header .sep {
     font-size: 13.5px;
     transition: background .15s, border-color .15s;
     white-space: nowrap;
+    line-height: 1.4;
 }
 .btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.5); }
 .btn.ghost { background: transparent; }
@@ -264,7 +290,7 @@ header .sep {
 
 .control-group { display: flex; align-items: center; gap: 7px; }
 .control-group label { font-size: 13.5px; color: var(--header-dim); }
-.control-group .muted { font-size: 12.5px; color: var(--header-dim); }
+.control-group .muted { font-size: 12.5px; color: var(--header-dim); white-space: nowrap; }
 
 header select, header input[type="text"] {
     padding: 6px 9px;
@@ -276,10 +302,18 @@ header select, header input[type="text"] {
     outline: none;
 }
 header select option { color: #2b2a28; background: #fff; }
+[data-theme="dark"] header select option { color: #d9d5cc; background: #26282e; }
 header select { max-width: 250px; }
-header input[type="text"] { width: 82px; }
+header input[type="text"] { width: 96px; }
 header input::placeholder { color: var(--header-dim); }
 header input[type="text"]:focus, header select:focus { border-color: rgba(255,255,255,.6); }
+
+.pos-indicator {
+    font-size: 12.5px;
+    color: var(--header-dim);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
 
 .lang-cbs { display: flex; gap: 12px; }
 .lang-cbs label {
@@ -291,6 +325,9 @@ header input[type="text"]:focus, header select:focus { border-color: rgba(255,25
 
 .spacer { margin-left: auto; }
 
+.hdr-more { display: contents; }
+.only-narrow { display: none; }
+
 /* 搜索面板 */
 #search-panel {
     flex: 0 0 auto;
@@ -301,7 +338,7 @@ header input[type="text"]:focus, header select:focus { border-color: rgba(255,25
     padding: 9px 16px;
     background: var(--surface-2);
     border-bottom: 1px solid var(--border);
-    z-index: 15;
+    z-index: 25;
 }
 #search-panel input[type="text"] {
     flex: 1 1 180px;
@@ -336,6 +373,42 @@ header input[type="text"]:focus, header select:focus { border-color: rgba(255,25
 .pbtn.primary:hover { background: var(--accent-soft); }
 #search-count { font-size: 13px; color: var(--text-dim); min-width: 60px; }
 
+/* 搜索结果列表 */
+#search-results {
+    flex: 0 0 auto;
+    max-height: 38vh;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    z-index: 24;
+}
+#search-results .sr-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+}
+#search-results .sr-item:hover,
+#search-results .sr-item.active { background: var(--surface-2); }
+#search-results .sr-item.active { box-shadow: inset 3px 0 0 var(--accent-soft); }
+#search-results .sr-loc {
+    display: inline-block;
+    min-width: 96px;
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-right: 8px;
+    font-variant-numeric: tabular-nums;
+}
+#search-results .sr-txt { color: var(--text); }
+#search-results .sr-empty { padding: 10px 16px; color: var(--text-dim); font-size: 13px; }
+
 /* 设置面板 */
 #settings-panel {
     position: absolute;
@@ -349,7 +422,7 @@ header input[type="text"]:focus, header select:focus { border-color: rgba(255,25
     display: flex;
     flex-direction: column;
     gap: 13px;
-    min-width: 264px;
+    min-width: 286px;
     color: var(--text);
 }
 #settings-panel h4 { margin: 0 0 2px; font-size: 14px; letter-spacing: 1px; color: var(--accent); }
@@ -366,10 +439,17 @@ header input[type="text"]:focus, header select:focus { border-color: rgba(255,25
     padding: 5px 8px;
     border: 1px solid var(--border); border-radius: 6px;
     background: var(--surface-2); color: var(--text);
-    max-width: 150px;
+    max-width: 160px;
 }
 #settings-panel .row input[type="checkbox"] { accent-color: var(--accent-soft); }
-#settings-panel .hint { font-size: 11.5px; color: var(--text-dim); line-height: 1.6; }
+#settings-panel .hint { font-size: 11.5px; color: var(--text-dim); line-height: 1.7; }
+#settings-panel .hint kbd {
+    font-family: inherit;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    padding: 0 3px;
+    background: var(--surface-2);
+}
 
 /* 主阅读区 */
 main {
@@ -389,13 +469,22 @@ main {
     min-width: 160px;
     position: relative;
     scrollbar-width: thin;
+    overscroll-behavior: contain;
 }
+.col > .col-inner { max-width: var(--measure); margin: 0 auto; }
 .col::-webkit-scrollbar { width: 10px; }
-.col::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+.col::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 .col::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-#col-gr { font-family: var(--font-gr); }
-#col-en { font-family: var(--font-en); text-align: justify; }
+#col-gr {
+    font-family: var(--font-gr);
+    font-size: var(--font-size-gr);
+    line-height: calc(var(--line-height) + .16);
+}
+#col-en { font-family: var(--font-en); text-align: justify; hyphens: auto; }
 #col-zh { font-family: var(--font-zh); text-align: justify; }
+
+body.hide-gr #col-gr, body.hide-zh #col-zh, body.hide-en #col-en { display: none; }
+body.hide-gr .seg-gr, body.hide-zh .seg-zh, body.hide-en .seg-en { display: none; }
 
 .resizer {
     flex: 0 0 6px;
@@ -403,6 +492,7 @@ main {
     cursor: col-resize;
     transition: background .15s;
     z-index: 5;
+    touch-action: none;
 }
 .resizer:hover, .resizer.active { background: var(--resizer-active); }
 
@@ -412,7 +502,7 @@ main {
     font-size: 1.28em;
     font-weight: 700;
     color: var(--accent);
-    padding-bottom: 6px;
+    padding: 6px 0 6px;
     margin: 18px 0 18px;
     border-bottom: 2px solid var(--border);
     position: sticky;
@@ -449,12 +539,33 @@ main {
     margin-bottom: 7px;
     letter-spacing: .5px;
     font-variant-numeric: tabular-nums;
-    opacity: .9;
+    background: none;
+    border: 0;
+    padding: 0;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 3px;
+}
+.line-range:hover { color: var(--accent); }
+.line-range::after {
+    content: "复制引用";
+    font-size: .82em;
+    font-weight: 400;
+    color: var(--text-dim);
+    opacity: 0;
+    margin-left: .6em;
+    transition: opacity .15s;
+}
+.verse-block:hover .line-range::after,
+.line-range:focus-visible::after { opacity: .8; }
+
+.text-part {
+    margin-bottom: 8px;
+    overflow-wrap: break-word;
+    word-break: normal;
 }
 
-.text-part { margin-bottom: 8px; }
-
-/* 斑马线底纹 (古希腊文/中文逐行对照) */
+/* 斑马线底纹 */
 .zebra-stripes .text-line {
     padding: 0 6px;
     margin: 0 -6px;
@@ -463,7 +574,7 @@ main {
 }
 .zebra-stripes .text-line:nth-child(even) { background-color: var(--zebra); }
 
-/* 希腊文行号标记 */
+/* 行号标记 */
 .ln {
     font-size: .68em;
     color: var(--ln);
@@ -481,6 +592,52 @@ mark {
     padding: 0 1px;
 }
 
+/* 窄屏：按段落卡片 */
+.card-block {
+    border-left: 3px solid var(--border);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px 14px;
+    margin-bottom: 18px;
+    background: var(--surface);
+    transition: border-color .25s, background .25s;
+}
+.card-block:hover { border-left-color: var(--resizer-active); }
+.card-block.flash { background: var(--flash); border-left-color: #d4a017; }
+.card-range {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: .5px;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1px 9px;
+    margin-bottom: 10px;
+    font-family: var(--font-zh);
+    cursor: pointer;
+}
+.card-range:hover { color: var(--accent); border-color: var(--accent-soft); }
+.seg { margin-bottom: 12px; }
+.seg:last-child { margin-bottom: 0; }
+.seg-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+    font-family: var(--font-zh);
+    opacity: .75;
+}
+.seg-gr .text-part {
+    font-family: var(--font-gr);
+    font-size: var(--font-size-gr);
+    line-height: calc(var(--line-height) + .16);
+}
+.seg-en .text-part { font-family: var(--font-en); hyphens: auto; }
+.seg-zh .text-part { font-family: var(--font-zh); }
+
 /* 悬浮翻卷箭头 */
 .nav-arrow {
     position: absolute;
@@ -488,15 +645,18 @@ mark {
     transform: translateY(-50%);
     width: 42px; height: 84px;
     background: rgba(0,0,0,.14);
-    color: rgba(255,255,255,.8);
+    color: rgba(255,255,255,.85);
     display: flex; align-items: center; justify-content: center;
     font-size: 26px;
     cursor: pointer;
     z-index: 50;
+    border: 0;
     border-radius: 8px;
     transition: background .2s, opacity .2s;
     user-select: none;
     opacity: .55;
+    font-family: var(--font-sans, sans-serif);
+    line-height: 1;
 }
 .nav-arrow:hover { background: rgba(0,0,0,.55); opacity: 1; }
 #nav-left { left: 10px; }
@@ -514,14 +674,132 @@ footer {
 }
 footer .sources { opacity: .85; }
 
-/* 响应式：窄屏单栏堆叠 */
+/* 提示条 */
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translate(-50%, 12px);
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 200;
+}
+#toast.show { opacity: .96; transform: translate(-50%, 0); }
+
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ============ 窄屏适配 ============ */
 @media (max-width: 880px) {
-    main { flex-direction: column; overflow-y: auto; }
-    .col { min-height: 46vh; overflow: visible; }
-    .resizer { display: none; }
+    header {
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    header .sep, .pos-indicator, .spacer { display: none; }
+    .epic-title {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: 0;
+    }
+    .epic-title .gr { display: none; }
+    .book-group select { max-width: 118px; }
+    #book-progress { display: none; }
+    .only-narrow { display: inline-flex; }
+
+    .hdr-more {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 8px; right: 8px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        z-index: 120;
+    }
+    .hdr-more.open { display: flex; }
+    .hdr-more .control-group { justify-content: space-between; }
+    .hdr-more .control-group input[type="text"] {
+        flex: 1 1 auto;
+        width: auto;
+        background: var(--surface-2);
+        color: var(--text);
+        border-color: var(--border);
+    }
+    .hdr-more .control-group input::placeholder { color: var(--text-dim); }
+    .hdr-more .btn {
+        background: var(--surface-2);
+        color: var(--text);
+        border-color: var(--border);
+    }
+    .hdr-more .btn:hover { background: var(--border); }
+    .hdr-more .lang-cbs { justify-content: space-between; }
+    .hdr-more .lang-cbs label { color: var(--text); }
+
     .nav-arrow { display: none; }
-    #col-gr, #col-zh, #col-en { border-bottom: 2px solid var(--border); }
-    header .epic-title { width: 100%; }
+    .resizer { display: none; }
+
+    #settings-panel {
+        top: 58px;
+        left: 8px; right: 8px;
+        min-width: 0;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    #search-panel { padding: 8px 12px; gap: 6px; }
+    #search-panel input[type="text"] { flex: 1 1 100%; max-width: none; }
+    #search-results { max-height: 34vh; }
+
+    .col { padding: 14px 14px 96px 14px; }
+    .section-title { top: -14px; }
+    .card-block { margin-bottom: 14px; }
+}
+
+@media (min-width: 881px) {
+    #btn-more { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    .col { scroll-behavior: auto; }
+}
+
+/* ============ 打印 ============ */
+@media print {
+    header, footer, #search-panel, #search-results, #settings-panel,
+    #progress-bar, .nav-arrow, .resizer, #toast { display: none !important; }
+    html, body, #reader-view { height: auto; background: #fff; }
+    main { display: block; overflow: visible; }
+    .col { overflow: visible; height: auto; max-height: none; padding: 0; }
+    .section-block:not(.print-current) { display: none !important; }
+    .section-title { position: static; }
+    .card-block, .verse-block { break-inside: avoid; page-break-inside: avoid; }
+    .card-block { border-left: 2px solid #ccc; }
+    @page { margin: 14mm; }
 }
 </style>
 </head>
@@ -540,63 +818,69 @@ footer .sources { opacity: .85; }
             行号采用荷马标准行号（每卷内重新计数）。希、中两栏按行逐行对照并附斑马底纹，英译按段落对齐。
         </div>
         <div class="usage">
-            <b>使用提示：</b>三栏同步滚动，可拖动分隔条调整栏宽；← → 键切换卷数；输入行号回车可跳转到当前卷指定行；
-            点击顶部「搜索」可检索三语全文（支持希腊文/中文/英文，回车定位下一条）；右上角齿轮可调字号、行距、字体；
-            🌙 切换夜间模式。阅读位置与偏好会自动记忆，下次打开直接续读。
+            <b>使用提示：</b>三栏同步滚动，可拖动分隔条调整栏宽；<kbd>←</kbd> <kbd>→</kbd> 切换卷数，<kbd>j</kbd> <kbd>k</kbd> 上下移动一段（<kbd>Shift</kbd> 加速）；
+            跳转框支持 <kbd>3.450</kbd>、<kbd>Γ 450</kbd>、<kbd>Il. 3.450</kbd> 等写法；
+            点击段落左侧的行号范围可复制标准引用；
+            <kbd>/</kbd> 检索三语全文（希腊文可不带变音符号）；右上角可调字号、字体与夜间模式。阅读位置会自动记忆。
         </div>
     </div>
 </div>
 
 <!-- ===================== 阅读器 ===================== -->
 <div id="reader-view" hidden>
-    <div id="progress-bar"></div>
-
     <header>
         <button class="btn ghost" id="btn-back" title="返回首页">‹ 首页</button>
         <span class="sep"></span>
         <span class="epic-title" id="epic-title"></span>
-        <span class="sep"></span>
-        <div class="control-group">
-            <select id="book-select" title="选择卷数"></select>
+        <div class="control-group book-group">
+            <select id="book-select" title="选择卷数" aria-label="选择卷数"></select>
             <span class="muted" id="book-progress"></span>
         </div>
-        <span class="sep"></span>
-        <div class="control-group" title="在当前卷内跳转到指定行号">
-            <input type="text" id="line-input" placeholder="行号" autocomplete="off">
-            <button class="btn" id="btn-jump">跳转</button>
-        </div>
-        <span class="sep"></span>
-        <div class="lang-cbs">
-            <label><input type="checkbox" id="chk-gr" class="lang-cb" checked> 希腊</label>
-            <label><input type="checkbox" id="chk-zh" class="lang-cb" checked> 中文</label>
-            <label><input type="checkbox" id="chk-en" class="lang-cb" checked> 英文</label>
-        </div>
+        <span class="pos-indicator" id="pos-indicator"></span>
         <div class="spacer"></div>
-        <button class="btn" id="btn-search" title="搜索 (/)">🔍 搜索</button>
-        <button class="btn" id="btn-theme" title="切换夜间模式">🌙</button>
-        <button class="btn" id="btn-settings" title="阅读设置">⚙</button>
+        <button class="btn ghost only-narrow" id="btn-more" aria-label="更多操作" aria-expanded="false">⋯</button>
+        <div class="hdr-more" id="hdr-more">
+            <div class="control-group jump-group" title="跳转到指定位置：3.450 / Γ 450 / Il. 3.450">
+                <input type="text" id="line-input" placeholder="3.450" autocomplete="off" aria-label="行号或标准引用">
+                <button class="btn" id="btn-jump">跳转</button>
+            </div>
+            <div class="lang-cbs" role="group" aria-label="显示语言">
+                <label><input type="checkbox" id="chk-gr" class="lang-cb" checked> 希腊</label>
+                <label><input type="checkbox" id="chk-zh" class="lang-cb" checked> 中文</label>
+                <label><input type="checkbox" id="chk-en" class="lang-cb" checked> 英文</label>
+            </div>
+            <button class="btn" id="btn-search" title="搜索 (/)">搜索</button>
+            <button class="btn" id="btn-theme" title="切换夜间模式">夜间</button>
+            <button class="btn" id="btn-settings" title="阅读设置">设置</button>
+        </div>
     </header>
 
     <div id="search-panel" hidden>
-        <input type="text" id="search-input" placeholder="输入要检索的希腊文 / 中文 / 英文…" autocomplete="off">
-        <select id="search-scope">
+        <input type="text" id="search-input" placeholder="检索希腊文 / 中文 / 英文…（希腊文可不带重音）" autocomplete="off">
+        <select id="search-scope" aria-label="检索范围">
             <option value="all">全部语言</option>
             <option value="gr">仅希腊文</option>
             <option value="zh">仅中文</option>
             <option value="en">仅英文</option>
         </select>
         <button class="pbtn primary" id="btn-search-go">搜索</button>
-        <span id="search-count"></span>
+        <span id="search-count" aria-live="polite"></span>
         <button class="pbtn" id="btn-search-prev" title="上一条 (Shift+Enter)">↑ 上一条</button>
         <button class="pbtn" id="btn-search-next" title="下一条 (Enter)">下一条 ↓</button>
-        <button class="pbtn" id="btn-search-clear" title="清除搜索">✕ 清除</button>
+        <button class="pbtn" id="btn-search-clear" title="清除搜索">清除</button>
     </div>
+
+    <div id="search-results" hidden></div>
 
     <div id="settings-panel" hidden>
         <h4>阅读设置</h4>
         <div class="row">
-            <span>字号</span>
+            <span>正文字号</span>
             <input type="number" id="setting-font-size" value="16" min="12" max="36">
+        </div>
+        <div class="row">
+            <span>希腊文字号</span>
+            <input type="number" id="setting-font-size-gr" value="17" min="12" max="40">
         </div>
         <div class="row">
             <span>行距</span>
@@ -611,22 +895,36 @@ footer .sources { opacity: .85; }
             </select>
         </div>
         <div class="row">
-            <span>显示希腊文行号标记</span>
+            <span>希腊文字体</span>
+            <select id="setting-font-gr">
+                <option value='"GFS Didot","Palatino","Hoefler Text","Baskerville","Times New Roman",serif'>Palatino（推荐）</option>
+                <option value='"GFS Didot","Hoefler Text","Palatino","Times New Roman",serif'>Hoefler Text</option>
+                <option value='"GFS Didot","Baskerville","Palatino","Times New Roman",serif'>Baskerville</option>
+                <option value='"Times New Roman","Palatino",serif'>Times New Roman</option>
+            </select>
+        </div>
+        <div class="row">
+            <span>显示行号标记</span>
             <input type="checkbox" id="setting-show-ln" checked>
         </div>
-        <div class="hint">← → 切换卷数　·　Enter 行号跳转　·　/ 搜索　·　Esc 关闭</div>
+        <div class="hint">
+            <kbd>←</kbd> <kbd>→</kbd> 切换卷数　·　<kbd>j</kbd> <kbd>k</kbd> 段落移动　·　<kbd>/</kbd> 搜索　·　<kbd>Esc</kbd> 关闭
+        </div>
     </div>
 
     <main id="reading-area">
-        <div id="nav-left" class="nav-arrow" title="上一卷 (←)">‹</div>
-        <div id="nav-right" class="nav-arrow" title="下一卷 (→)">›</div>
+        <div id="progress-bar"></div>
+        <button class="nav-arrow" id="nav-left" aria-label="上一卷">‹</button>
+        <button class="nav-arrow" id="nav-right" aria-label="下一卷">›</button>
     </main>
 
     <footer>
-        <div>荷马史诗 · 三语对读　|　XClassics Reader v0.1.1</div>
+        <div>荷马史诗 · 三语对读　|　XClassics Reader v0.2.0</div>
         <div class="sources">古希腊文：洛布古典丛书（Murray / Wyatt）· 英译：洛布版 Murray（段落级）· 中译：王焕生　|　行号：荷马标准行号（卷内）· 仅供学习研究</div>
     </footer>
 </div>
+
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script type="application/json" id="epic-data">__EPIC_DATA__</script>
 
@@ -634,20 +932,24 @@ footer .sources { opacity: .85; }
 (function () {
     'use strict';
 
-    /* ================= 数据加载 ================= */
+    /* ================= 数据 ================= */
     let EPIC_DATA = null;
     try {
-        EPIC_DATA = JSON.parse(document.getElementById('epic-data').textContent);
+        const raw = document.getElementById('epic-data').textContent.trim();
+        EPIC_DATA = raw ? JSON.parse(raw) : null;
     } catch (e) {
         EPIC_DATA = null;
     }
 
     const EPICS = [
-        { key: 'iliad',   label: '伊利亚特', en: 'Iliad',   gr: 'Ἰλιάς' },
-        { key: 'odyssey', label: '奥德赛',   en: 'Odyssey', gr: 'Ὀδύσσεια' }
+        { key: 'iliad',   label: '伊利亚特', en: 'Iliad',   gr: 'Ἰλιάς',   abbr: 'Il.' },
+        { key: 'odyssey', label: '奥德赛',   en: 'Odyssey', gr: 'Ὀδύσσεια', abbr: 'Od.' }
     ];
+    const LANGS = ['gr', 'zh', 'en'];
+    const SEG_LABEL = { gr: '古希腊文', en: '英译', zh: '中译' };
+    const BREAKPOINT = 880;
 
-    /* ================= DOM 引用 ================= */
+    /* ================= DOM ================= */
     const $ = (id) => document.getElementById(id);
     const homeView = $('home-view');
     const readerView = $('reader-view');
@@ -660,88 +962,200 @@ footer .sources { opacity: .85; }
     const lineInput = $('line-input');
     const navLeft = $('nav-left');
     const navRight = $('nav-right');
-
-    const cols = {
-        gr: document.createElement('div'),
-        zh: document.createElement('div'),
-        en: document.createElement('div')
-    };
-    cols.gr.id = 'col-gr'; cols.gr.className = 'col';
-    cols.zh.id = 'col-zh'; cols.zh.className = 'col';
-    cols.en.id = 'col-en'; cols.en.className = 'col';
-
+    const posIndicator = $('pos-indicator');
+    const toastEl = $('toast');
     const root = document.documentElement;
+
+    function makeCol(id, lang) {
+        const d = document.createElement('div');
+        d.id = id;
+        d.className = 'col';
+        if (lang) d.lang = lang;
+        const inner = document.createElement('div');
+        inner.className = 'col-inner';
+        d.appendChild(inner);
+        return d;
+    }
+    const cols = {
+        gr: makeCol('col-gr', 'grc'),
+        zh: makeCol('col-zh', 'zh-CN'),
+        en: makeCol('col-en', 'en')
+    };
+    const cardCol = makeCol('col-card', null);
 
     /* ================= 状态 ================= */
     let rawData = null;
     let epicKey = null;
+    let epicAbbr = 'Il.';
     let currentBookIndex = 0;
     let totalBooks = 0;
+    let flat = [];
+    const bookStart = [];
+    let viewMode = 'cols';
+    let weights = { gr: 1, zh: 1, en: 1 };
     let searchResults = [];
     let searchIndex = -1;
     let searchQuery = '';
+    let highlighted = [];
 
     const LS = {
         theme: 'xclassics-theme',
         lastEpic: 'xclassics-last-epic',
         settings: 'xclassics-settings',
+        weights: 'xclassics-weights',
         pos: (k) => 'xclassics-pos-' + k
     };
 
-    /* ================= 工具函数 ================= */
+    /* ================= 归一化（搜索用） ================= */
+    // NFD 去组合变音符，统一 sigma / 引号，并保留「归一化索引 → 原文索引」的映射
+    const STRIP_PUNCT = /[\u1FBF\u1FBD\u2019\u02BC'\u2018`\u00B4]/;
+    function normWithMap(s) {
+        let norm = '';
+        const map = [];
+        for (let i = 0; i < s.length; i++) {
+            const ch = s[i];
+            const d = ch.normalize ? ch.normalize('NFD') : ch;
+            for (let j = 0; j < d.length; j++) {
+                const c = d[j];
+                const code = c.charCodeAt(0);
+                if (code >= 0x300 && code <= 0x36f) continue;
+                if (STRIP_PUNCT.test(c)) continue;
+                if (c === '\u03C2') { norm += '\u03C3'; map.push(i); continue; }
+                norm += c.toLowerCase();
+                map.push(i);
+            }
+        }
+        return { norm, map };
+    }
+    function normKey(s) { return normWithMap(s).norm; }
+    // 扫描用轻量归一化（不建索引映射，避免大文本重复分配）
+    const RE_COMBINING = /[\u0300-\u036F]/g;
+    const RE_APOS = /[\u1FBF\u1FBD\u2019\u02BC'\u2018`\u00B4]/g;
+    function normFast(s) {
+        return s.normalize('NFD')
+            .replace(RE_COMBINING, '')
+            .replace(RE_APOS, '')
+            .replace(/\u03C2/g, '\u03C3')
+            .toLowerCase();
+    }
+
     function escapeHtml(s) {
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
-    // 大小写不敏感的加亮包装
-    function markStr(s, q) {
+    // 归一化匹配 + 按原文索引高亮
+    function markNormalized(s, q) {
         if (!q) return escapeHtml(s);
-        const lower = s.toLowerCase();
-        const ql = q.toLowerCase();
-        let out = '', i = 0;
-        while (i < s.length) {
-            const idx = lower.indexOf(ql, i);
-            if (idx === -1) { out += escapeHtml(s.slice(i)); break; }
-            out += escapeHtml(s.slice(i, idx));
-            out += '<mark>' + escapeHtml(s.slice(idx, idx + q.length)) + '</mark>';
-            i = idx + q.length;
+        const qn = normKey(q);
+        if (!qn) return escapeHtml(s);
+        const { norm, map } = normWithMap(s);
+        let out = '', i = 0, pos = 0;
+        for (;;) {
+            const idx = norm.indexOf(qn, pos);
+            if (idx === -1) break;
+            const sIdx = map[idx];
+            const eIdx = (idx + qn.length < map.length) ? map[idx + qn.length] : s.length;
+            if (eIdx <= sIdx) break;
+            out += escapeHtml(s.slice(i, sIdx));
+            out += '<mark>' + escapeHtml(s.slice(sIdx, eIdx)) + '</mark>';
+            i = eIdx;
+            pos = idx + qn.length;
         }
+        out += escapeHtml(s.slice(i));
         return out;
     }
-    // 解析行首 [N] 标记
+
     function splitLn(line) {
         const m = line.match(/^\[(\d+)\]\s?(.*)$/);
         if (m) return { ln: m[1], body: m[2] };
         return { ln: null, body: line };
     }
-    function renderTextLine(line, q) {
-        const { ln, body } = splitLn(line);
-        const lnHtml = ln ? '<span class="ln">' + ln + '</span>' : '';
-        return '<div class="text-line">' + lnHtml + (markStr(body, q) || '&nbsp;') + '</div>';
+    function renderTextLine(line, q, lnOverride) {
+        const r = splitLn(line);
+        const n = (lnOverride !== null && lnOverride !== undefined) ? lnOverride : r.ln;
+        const lnHtml = n !== null && n !== undefined ? '<span class="ln">' + n + '</span>' : '';
+        return '<div class="text-line">' + lnHtml + (markNormalized(r.body, q) || '&nbsp;') + '</div>';
     }
-    // 生成单个 verse-block 的内部 HTML
-    function verseBlockInner(bookIdx, pIdx, lang, q) {
-        const page = rawData.books[bookIdx].pages[pIdx];
-        const s = page.lines[0], e = page.lines[1];
-        const text = page[lang];
-        let h = '<div class="line-range">' + s + '–' + e + '</div>';
+
+    // 中译行号锚点：希/中各页行数高度一致，可按比例还原荷马行号
+    function zhLineNo(page, idx, count) {
+        const start = page.lines[0], end = page.lines[1];
+        const total = end - start + 1;
+        if (count === total) return start + idx;
+        if (count <= 1) return start;
+        return start + Math.round(idx * (total - 1) / (count - 1));
+    }
+
+    function verseBody(bIdx, pIdx, lang, q) {
+        const page = rawData.books[bIdx].pages[pIdx];
+        const text = page[lang] == null ? '' : page[lang];
         if (lang === 'en') {
-            h += '<div class="text-part en-text">' + markStr(text, q).replace(/\n/g, '<br>') + '</div>';
-        } else {
-            const lines = text.split('\n');
-            h += '<div class="text-part zebra-stripes">' + lines.map(l => renderTextLine(l, q)).join('') + '</div>';
+            return '<div class="text-part en-text">' + markNormalized(text, q).replace(/\n/g, '<br>') + '</div>';
         }
+        const lines = text.split('\n');
+        const isZh = lang === 'zh';
+        const html = lines.map((l, i) => {
+            let ln = null;
+            if (isZh) {
+                const gl = zhLineNo(page, i, lines.length);
+                if (gl % 5 === 0) ln = gl;
+            }
+            return renderTextLine(l, q, ln);
+        }).join('');
+        return '<div class="text-part zebra-stripes">' + html + '</div>';
+    }
+
+    function rangeBtn(page, asButton) {
+        const txt = page.lines[0] + '–' + page.lines[1];
+        if (asButton) {
+            return '<button class="card-range" type="button" data-act="cite" title="点击复制标准引用">' + txt + '</button>';
+        }
+        return '<button class="line-range" type="button" data-act="cite" title="点击复制标准引用">' + txt + '</button>';
+    }
+
+    function verseBlockInner(bIdx, pIdx, lang, q) {
+        const page = rawData.books[bIdx].pages[pIdx];
+        return rangeBtn(page, false) + verseBody(bIdx, pIdx, lang, q);
+    }
+    function cardInner(bIdx, pIdx, q) {
+        const page = rawData.books[bIdx].pages[pIdx];
+        let h = rangeBtn(page, true);
+        LANGS.forEach(lang => {
+            h += '<div class="seg seg-' + lang + '">' +
+                 '<span class="seg-label">' + SEG_LABEL[lang] + '</span>' +
+                 verseBody(bIdx, pIdx, lang, q) +
+                 '</div>';
+        });
         return h;
     }
-    // 构建整栏 HTML（一次 innerHTML，性能佳）
+
     function buildColumnHtml(lang, q) {
         let h = '';
+        let k = 0;
         rawData.books.forEach((book, bIdx) => {
             h += '<div class="section-block" id="sec-' + lang + '-' + bIdx + '" data-book="' + bIdx + '">';
             h += '<div class="section-title"><span class="book-no">第 ' + book.book + ' 卷</span>' + escapeHtml(book.title_zh) + '</div>';
             book.pages.forEach((page, pIdx) => {
-                h += '<div class="verse-block" data-book="' + bIdx + '" data-page="' + pIdx + '" data-start="' + page.lines[0] + '" data-end="' + page.lines[1] + '">';
+                h += '<div class="verse-block" data-flat="' + k + '" data-book="' + bIdx + '" data-page="' + pIdx + '" data-start="' + page.lines[0] + '" data-end="' + page.lines[1] + '">';
                 h += verseBlockInner(bIdx, pIdx, lang, q);
                 h += '</div>';
+                k++;
+            });
+            h += '</div>';
+        });
+        return h;
+    }
+
+    function buildCardHtml(q) {
+        let h = '';
+        let k = 0;
+        rawData.books.forEach((book, bIdx) => {
+            h += '<div class="section-block" data-book="' + bIdx + '">';
+            h += '<div class="section-title"><span class="book-no">第 ' + book.book + ' 卷</span>' + escapeHtml(book.title_zh) + '</div>';
+            book.pages.forEach((page, pIdx) => {
+                h += '<div class="card-block" data-flat="' + k + '" data-book="' + bIdx + '" data-page="' + pIdx + '" data-start="' + page.lines[0] + '" data-end="' + page.lines[1] + '">';
+                h += cardInner(bIdx, pIdx, q);
+                h += '</div>';
+                k++;
             });
             h += '</div>';
         });
@@ -749,9 +1163,8 @@ footer .sources { opacity: .85; }
     }
 
     function enabledLangs() {
-        return ['gr', 'zh', 'en'].filter(l => $('chk-' + l).checked);
+        return LANGS.filter(l => $('chk-' + l).checked);
     }
-
     function totalLines(epic) {
         let n = 0;
         epic.books.forEach(b => b.pages.forEach(p => { n += p.lines[1] - p.lines[0] + 1; }));
@@ -762,8 +1175,37 @@ footer .sources { opacity: .85; }
         epic.books.forEach(b => { n += b.pages.length; });
         return n;
     }
+    function mode() { return window.innerWidth <= BREAKPOINT ? 'cards' : 'cols'; }
 
-    /* ================= 首页渲染 ================= */
+    /* ================= 提示 ================= */
+    let toastTimer = null;
+    function toast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+    function copyText(text) {
+        const done = () => toast('已复制：' + text);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+        } else {
+            fallbackCopy(text, done);
+        }
+    }
+    function fallbackCopy(text, cb) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); cb(); } catch (e) { toast('复制失败'); }
+        document.body.removeChild(ta);
+    }
+
+    /* ================= 首页 ================= */
     function renderHome() {
         if (!EPIC_DATA) {
             homeCards.innerHTML = '<div style="color:#c0392b;max-width:600px;text-align:center;">数据未加载。请用 build_reader.py 重新生成此 HTML（需内嵌《伊利亚特》与《奥德赛》JSON）。</div>';
@@ -772,12 +1214,13 @@ footer .sources { opacity: .85; }
         let h = '';
         EPICS.forEach(ep => {
             const d = EPIC_DATA[ep.key];
+            if (!d) return;
             const books = d.books.length;
             const pages = totalPages(d);
             const lines = totalLines(d);
             const saved = loadPosition(ep.key);
-            const cont = saved ? '（上次读到第 ' + (saved.book + 1) + ' 卷，可续读）' : '';
-            h += '<div class="epic-card" data-epic="' + ep.key + '">' +
+            const resume = saved ? '上次读到第 ' + (saved.book + 1) + ' 卷' : '';
+            h += '<div class="epic-card" data-epic="' + ep.key + '" role="button" tabindex="0">' +
                  '<div class="gr-title">' + ep.gr + '</div>' +
                  '<h2>' + ep.label + '</h2>' +
                  '<div class="en-title">' + ep.en + '</div>' +
@@ -788,29 +1231,55 @@ footer .sources { opacity: .85; }
                  '</div>' +
                  '<p class="src">' + escapeHtml(d.translators && d.translators.zh ? ('中译：' + d.translators.zh) : '') +
                  (d.translators && d.translators.en ? '　·　英译：' + d.translators.en : '') + '</p>' +
-                 '<div class="enter">开始阅读 →</div>' +
-                 (cont ? '<div class="continue">' + cont + '</div>' : '') +
+                 '<div class="enter">' + (resume ? '继续阅读 →' : '开始阅读 →') + '</div>' +
+                 (resume ? '<div class="continue">' + resume + '</div>' : '') +
                  '</div>';
         });
         homeCards.innerHTML = h;
         homeCards.querySelectorAll('.epic-card').forEach(card => {
-            card.addEventListener('click', () => loadEpic(card.dataset.epic));
+            const open = () => loadEpic(card.dataset.epic);
+            card.addEventListener('click', open);
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+            });
         });
     }
 
     /* ================= 进入阅读器 ================= */
-    function loadEpic(key) {
+    function flatForLine(bookIdx, line) {
+        const start = bookStart[bookIdx];
+        if (start === undefined) return 0;
+        for (let i = start; i < flat.length && flat[i].book === bookIdx; i++) {
+            if (line >= flat[i].start && line <= flat[i].end) return i;
+        }
+        for (let i = start; i < flat.length && flat[i].book === bookIdx; i++) {
+            if (flat[i].end >= line) return i;
+        }
+        return start;
+    }
+
+    function loadEpic(key, opts) {
         if (!EPIC_DATA || !EPIC_DATA[key]) return;
+        opts = opts || {};
         epicKey = key;
         rawData = EPIC_DATA[key];
+        epicAbbr = (EPICS.find(e => e.key === key) || {}).abbr || 'Il.';
         totalBooks = rawData.books.length;
         currentBookIndex = 0;
 
+        flat = [];
+        bookStart.length = 0;
+        rawData.books.forEach((b, bi) => {
+            bookStart[bi] = flat.length;
+            b.pages.forEach((p, pi) => {
+                flat.push({ book: bi, page: pi, start: p.lines[0], end: p.lines[1] });
+            });
+        });
+
         const d = rawData;
-        epicTitle.innerHTML = d.title + '<span class="gr">' + (d.title_gr || '') + '</span>';
+        epicTitle.innerHTML = escapeHtml(d.title) + '<span class="gr">' + (d.title_gr || '') + '</span>';
         document.title = d.title + ' · 三语对读 - XClassics';
 
-        // 卷数下拉
         bookSelect.innerHTML = '';
         rawData.books.forEach((book, i) => {
             const opt = document.createElement('option');
@@ -819,84 +1288,142 @@ footer .sources { opacity: .85; }
             bookSelect.appendChild(opt);
         });
 
-        // 渲染三栏
-        cols.gr.innerHTML = buildColumnHtml('gr', '');
-        cols.zh.innerHTML = buildColumnHtml('zh', '');
-        cols.en.innerHTML = buildColumnHtml('en', '');
+        viewMode = mode();
+        renderContent('');
+        buildFrames();
 
-        clearSearch();
-        updateLayout();
         homeView.hidden = true;
         readerView.hidden = false;
 
-        // 恢复阅读位置
         const saved = loadPosition(key);
-        if (saved) {
+        if (opts.line !== undefined && opts.line !== null) {
+            currentBookIndex = opts.book
+                ? Math.min(Math.max(1, opts.book), totalBooks) - 1
+                : Math.min(Math.max(0, (saved && saved.book) || 0), totalBooks - 1);
+        } else if (saved) {
             currentBookIndex = Math.min(Math.max(0, saved.book), totalBooks - 1);
-            bookSelect.value = currentBookIndex;
-            requestAnimationFrame(() => {
-                enabledLangs().forEach(lang => {
-                    const top = (saved.tops && saved.tops[lang]) || 0;
-                    cols[lang].scrollTop = top;
-                });
-            });
         } else {
-            goToBook(0, { noScroll: true });
+            currentBookIndex = 0;
         }
+        bookSelect.value = currentBookIndex;
         updateBookUI();
         updateArrows();
-    }
-
-    /* ================= 语言列布局与拖拽 ================= */
-    function updateLayout() {
-        if (!rawData) return;
-        readingArea.querySelectorAll('.col, .resizer').forEach(el => el.remove());
-        readingArea.appendChild(navLeft);
-        readingArea.appendChild(navRight);
-        const visible = enabledLangs();
-        visible.forEach((lang, i) => {
-            cols[lang].style.flex = '1 1 0';
-            readingArea.appendChild(cols[lang]);
-            if (i < visible.length - 1) {
-                const r = document.createElement('div');
-                r.className = 'resizer';
-                r.addEventListener('mousedown', initDrag);
-                readingArea.appendChild(r);
+        requestAnimationFrame(() => {
+            if (opts.line !== undefined && opts.line !== null) {
+                const b = rawData.books[currentBookIndex];
+                const maxLine = b.pages[b.pages.length - 1].lines[1];
+                const ln = Math.min(Math.max(1, opts.line), maxLine);
+                const tf = flatForLine(currentBookIndex, ln);
+                scrollToLine(tf, ln - flat[tf].start);
+                flashFlat(tf);
+            } else if (saved && typeof saved.flat === 'number' && saved.flat < flat.length) {
+                restoreAnchor({ flat: saved.flat, ratio: saved.ratio || 0 });
+            } else {
+                scrollToBook(0, 'auto');
             }
+            updateProgress();
+            updatePosIndicator();
         });
     }
 
+    function renderContent(q) {
+        q = q || '';
+        if (viewMode === 'cards') {
+            cardCol.firstChild.innerHTML = buildCardHtml(q);
+        } else {
+            LANGS.forEach(lang => { cols[lang].firstChild.innerHTML = buildColumnHtml(lang, q); });
+        }
+    }
+
+    function buildFrames() {
+        readingArea.querySelectorAll('.col, .resizer').forEach(el => el.remove());
+        if (viewMode === 'cards') {
+            cardCol.style.flex = '1 1 auto';
+            cardCol.style.minWidth = '0';
+            readingArea.appendChild(cardCol);
+        } else {
+            const vis = enabledLangs();
+            vis.forEach((lang, i) => {
+                cols[lang].style.flex = weights[lang] + ' 1 0';
+                cols[lang].style.minWidth = '160px';
+                readingArea.appendChild(cols[lang]);
+                if (i < vis.length - 1) {
+                    const r = document.createElement('div');
+                    r.className = 'resizer';
+                    r.addEventListener('mousedown', initDrag);
+                    r.addEventListener('touchstart', initDrag, { passive: false });
+                    readingArea.appendChild(r);
+                }
+            });
+        }
+        applyLangVisibility();
+        updateLayoutState();
+    }
+
+    function applyLangVisibility() {
+        const vis = enabledLangs();
+        LANGS.forEach(l => document.body.classList.toggle('hide-' + l, vis.indexOf(l) < 0));
+    }
+    function updateLayoutState() {
+        document.body.dataset.layout = viewMode;
+    }
+
+    /* ================= 栏宽拖拽 ================= */
     let isResizing = false, currentResizer = null;
     function initDrag(e) {
+        if (viewMode !== 'cols') return;
+        // 开始拖拽前，把当前各栏实际宽度记成权重，保证三者量纲一致
+        enabledLangs().forEach(l => {
+            const w = cols[l].getBoundingClientRect().width;
+            if (w > 0) weights[l] = w;
+        });
         isResizing = true;
-        currentResizer = e.target;
+        currentResizer = e.currentTarget;
         currentResizer.classList.add('active');
         document.body.style.cursor = 'col-resize';
-        readingArea.querySelectorAll('.col').forEach(c => c.style.pointerEvents = 'none');
-        e.preventDefault();
+        readingArea.querySelectorAll('.col').forEach(c => { c.style.pointerEvents = 'none'; });
+        if (e.cancelable) e.preventDefault();
     }
-    document.addEventListener('mousemove', (e) => {
+    function onDragMove(clientX) {
         if (!isResizing || !currentResizer) return;
         const prev = currentResizer.previousElementSibling;
         const next = currentResizer.nextElementSibling;
         if (!prev || !next) return;
-        const cw = readingArea.clientWidth;
         const total = prev.getBoundingClientRect().width + next.getBoundingClientRect().width;
-        let npw = e.clientX - prev.getBoundingClientRect().left;
-        let nnw = total - npw;
+        const npw = clientX - prev.getBoundingClientRect().left;
+        const nnw = total - npw;
         if (npw > 140 && nnw > 140) {
-            prev.style.flex = '0 0 ' + (npw / cw * 100) + '%';
-            next.style.flex = '0 0 ' + (nnw / cw * 100) + '%';
+            const pl = prev.id.replace('col-', '');
+            const nl = next.id.replace('col-', '');
+            weights[pl] = npw;
+            weights[nl] = nnw;
+            normalizeWeights();
+            prev.style.flex = weights[pl] + ' 1 0';
+            next.style.flex = weights[nl] + ' 1 0';
         }
-    });
-    document.addEventListener('mouseup', () => {
+    }
+    function normalizeWeights() {
+        const vis = enabledLangs();
+        let sum = 0;
+        vis.forEach(l => { sum += weights[l] || 1; });
+        const scale = sum > 0 ? vis.length / sum : 1;
+        vis.forEach(l => { weights[l] = Math.max(0.05, (weights[l] || 1) * scale); });
+    }
+    document.addEventListener('mousemove', (e) => onDragMove(e.clientX));
+    document.addEventListener('touchmove', (e) => {
+        if (isResizing && e.touches[0]) onDragMove(e.touches[0].clientX);
+    }, { passive: true });
+    function endDrag() {
         if (!isResizing) return;
         isResizing = false;
         if (currentResizer) currentResizer.classList.remove('active');
         currentResizer = null;
         document.body.style.cursor = '';
-        readingArea.querySelectorAll('.col').forEach(c => c.style.pointerEvents = '');
-    });
+        readingArea.querySelectorAll('.col').forEach(c => { c.style.pointerEvents = ''; });
+        try { localStorage.setItem(LS.weights, JSON.stringify(weights)); } catch (e) {}
+    }
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
 
     /* ================= 卷导航 ================= */
     function updateBookUI() {
@@ -906,7 +1433,7 @@ footer .sources { opacity: .85; }
         bookProgress.textContent = (currentBookIndex + 1) + ' / ' + totalBooks + ' 卷';
         const first = b.pages[0].lines[0];
         const last = b.pages[b.pages.length - 1].lines[1];
-        lineInput.placeholder = first + '–' + last;
+        lineInput.placeholder = currentBookIndex + 1 + '.' + first + '–' + last;
     }
     function updateArrows() {
         navLeft.style.display = currentBookIndex > 0 ? 'flex' : 'none';
@@ -919,43 +1446,175 @@ footer .sources { opacity: .85; }
         updateBookUI();
         updateArrows();
         if (opts.noScroll) return;
-        const behavior = opts.instant ? 'auto' : 'smooth';
-        suppressSync(() => {
-            enabledLangs().forEach(lang => {
-                const sec = document.getElementById('sec-' + lang + '-' + index);
-                if (sec) cols[lang].scrollTo({ top: sec.offsetTop - 2, behavior });
-            });
-        });
+        suppressSync(() => scrollToBook(index, 'auto'));
         savePosition();
     }
 
+    /* ================= 定位与滚动 ================= */
+    function activeContainer() {
+        if (!rawData) return null;
+        if (viewMode === 'cards') return cardCol;
+        const vis = enabledLangs();
+        if (activeCol && vis.indexOf(activeCol.id.replace('col-', '')) !== -1) return activeCol;
+        return vis.length ? cols[vis[0]] : null;
+    }
+    function blockAt(container, idx) {
+        if (!container) return null;
+        return container.querySelector('[data-flat="' + idx + '"]');
+    }
+    function scrollToBook(index, behavior) {
+        const b = behavior || 'auto';
+        if (viewMode === 'cards') {
+            const sec = cardCol.querySelector('.section-block[data-book="' + index + '"]');
+            if (sec) cardCol.scrollTo({ top: Math.max(0, sec.offsetTop - 8), behavior: b });
+        } else {
+            const vis = enabledLangs();
+            vis.forEach(l => {
+                const sec = cols[l].querySelector('.section-block[data-book="' + index + '"]');
+                if (sec) cols[l].scrollTo({ top: Math.max(0, sec.offsetTop - 8), behavior: b });
+            });
+            if (vis.length) activeCol = cols[vis[0]];
+        }
+        updateProgress();
+        clearTimeout(posTimer);
+        posTimer = setTimeout(updatePosIndicator, 60);
+    }
+    function scrollToFlat(idx, offset, behavior) {
+        offset = offset || 0;
+        const b = behavior || 'auto';
+        if (viewMode === 'cards') {
+            const el = blockAt(cardCol, idx);
+            if (el) cardCol.scrollTo({ top: Math.max(0, el.offsetTop - offset), behavior: b });
+        } else {
+            const vis = enabledLangs();
+            vis.forEach(lang => {
+                const el = blockAt(cols[lang], idx);
+                if (el) cols[lang].scrollTo({ top: Math.max(0, el.offsetTop - offset), behavior: b });
+            });
+            // 程序定位后三栏都在同一处，把激活栏指向第一栏，指示器才不会读到旧位置
+            if (vis.length) activeCol = cols[vis[0]];
+        }
+        updateProgress();
+        clearTimeout(posTimer);
+        posTimer = setTimeout(updatePosIndicator, 60);
+    }
+    function topInset(container) {
+        if (!container) return 36;
+        const t = container.querySelector('.section-title');
+        if (!t) return 36;
+        const stickyTop = parseFloat(getComputedStyle(t).top) || 0;
+        return Math.max(12, t.offsetHeight + stickyTop) + 8;
+    }
+    function visibleAnchor(container) {
+        if (!container) return null;
+        const blocks = container.querySelectorAll('[data-flat]');
+        if (!blocks.length) return null;
+        const st = container.scrollTop;
+        const inset = topInset(container);
+        const lineAtTop = st + inset;
+        // 取「覆盖视口顶端那一行」的块：块底边越过顶线即算命中，
+        // 这样顶端落在卷标题空白处时会归到该卷第一块，而不是上一卷末尾。
+        let i = blocks.length - 1;
+        for (let k = 0; k < blocks.length; k++) {
+            if (blocks[k].offsetTop + blocks[k].offsetHeight > lineAtTop) { i = k; break; }
+        }
+        const b = blocks[i];
+        const h = b.offsetHeight || 1;
+        const ratio = Math.min(1, Math.max(0, (lineAtTop - b.offsetTop) / h));
+        // 逐行元素可用时，取视口顶部那一行的真实行号，比按比例估算更准
+        let lineIdx = null;
+        const scope = b.querySelector('.seg-gr') || b;
+        const lines = scope.querySelectorAll('.text-line');
+        if (lines.length) {
+            let j = lines.length - 1;
+            for (let k = 0; k < lines.length; k++) {
+                if (lines[k].offsetTop + lines[k].offsetHeight > lineAtTop) { j = k; break; }
+            }
+            lineIdx = j;
+        }
+        return { flat: +b.dataset.flat, ratio: ratio, lineIdx: lineIdx };
+    }
+    function scrollToLine(flatIdx, rel) {
+        const apply = (container) => {
+            const block = blockAt(container, flatIdx);
+            if (!block) return;
+            const inset = topInset(container);
+            const scope = block.querySelector('.seg-gr') || block;
+            const lines = scope.querySelectorAll('.text-line');
+            let top = block.offsetTop;
+            if (lines.length) {
+                const t = lines[Math.min(Math.max(0, rel || 0), lines.length - 1)];
+                if (t) top = t.offsetTop;
+            }
+            container.scrollTo({ top: Math.max(0, top - inset), behavior: 'auto' });
+        };
+        if (viewMode === 'cards') apply(cardCol);
+        else enabledLangs().forEach(l => apply(cols[l]));
+        updateProgress();
+        clearTimeout(posTimer);
+        posTimer = setTimeout(updatePosIndicator, 60);
+    }
+    function captureAnchor() {
+        return visibleAnchor(activeContainer());
+    }
+    function restoreAnchor(a) {
+        if (!a) return;
+        const apply = (container) => {
+            if (!container) return;
+            const el = blockAt(container, a.flat);
+            if (el) container.scrollTop = Math.max(0, el.offsetTop + (a.ratio || 0) * (el.offsetHeight || 0));
+        };
+        if (viewMode === 'cards') apply(cardCol);
+        else enabledLangs().forEach(l => apply(cols[l]));
+    }
+    function updateProgress() {
+        const c = activeContainer();
+        if (!c) return;
+        const max = c.scrollHeight - c.clientHeight;
+        progressBar.style.width = (max > 0 ? Math.min(100, (c.scrollTop / max) * 100) : 0) + '%';
+    }
+    function updatePosIndicator() {
+        const c = activeContainer();
+        if (!c) return;
+        const a = visibleAnchor(c);
+        if (!a) { posIndicator.textContent = ''; return; }
+        const f = flat[a.flat];
+        if (!f) return;
+        const line = (a.lineIdx !== null && a.lineIdx !== undefined)
+            ? Math.min(f.end, f.start + a.lineIdx)
+            : Math.round(f.start + a.ratio * (f.end - f.start));
+        posIndicator.textContent = '第 ' + (f.book + 1) + ' 卷 · 行 ' + line;
+    }
+
     /* ================= 同步滚动 ================= */
-    const isMobileLayout = () => window.matchMedia('(max-width: 880px)').matches;
+    const isMobileLayout = () => window.innerWidth <= BREAKPOINT;
     let isSyncing = false, activeCol = null, syncTimer = null;
     let isJumping = false, jumpTimer = null;
 
-    function suppressSync(fn) {
+    function suppressSync(fn, ms) {
         isJumping = true;
+        isSyncing = false;
         clearTimeout(jumpTimer);
         fn();
-        jumpTimer = setTimeout(() => { isJumping = false; }, 900);
+        jumpTimer = setTimeout(() => { isJumping = false; }, ms || 260);
     }
 
     function syncCols(sourceCol) {
+        if (isMobileLayout()) return;
         const langs = enabledLangs();
         if (langs.length <= 1) return;
         const srcLang = sourceCol.id.replace('col-', '');
         const scrollTop = sourceCol.scrollTop;
-        const srcVerses = sourceCol.querySelectorAll('.verse-block');
+        const srcVerses = sourceCol.querySelectorAll('[data-flat]');
         if (!srcVerses.length) return;
         let idx = -1;
         for (let i = 0; i < srcVerses.length; i++) {
-            if (srcVerses[i].offsetTop <= scrollTop + 12) idx = i; else break;
+            if (srcVerses[i].offsetTop <= scrollTop + 10) idx = i; else break;
         }
         langs.forEach(lang => {
             if (lang === srcLang) return;
             const tcol = cols[lang];
-            const tverses = tcol.querySelectorAll('.verse-block');
+            const tverses = tcol.querySelectorAll('[data-flat]');
             if (!tverses.length) return;
             let top = 0;
             if (idx === -1) {
@@ -977,27 +1636,23 @@ footer .sources { opacity: .85; }
                     top = tsY + p * (teY - tsY);
                 }
             }
-            tcol.scrollTop = top;
+            tcol.scrollTop = Math.max(0, top);
         });
     }
 
-    function detectBook(col) {
-        const blocks = col.querySelectorAll('.section-block');
-        const st = col.scrollTop;
-        for (let i = 0; i < blocks.length; i++) {
-            if (blocks[i].offsetTop > st + 150) return Math.max(0, i - 1);
-        }
-        return blocks.length - 1;
-    }
-
-    let saveTimer = null;
+    let saveTimer = null, posTimer = null;
     function savePosition() {
         if (!epicKey || !rawData) return;
-        localStorage.setItem(LS.lastEpic, epicKey);
-        localStorage.setItem(LS.pos(epicKey), JSON.stringify({
-            book: currentBookIndex,
-            tops: { gr: cols.gr.scrollTop, zh: cols.zh.scrollTop, en: cols.en.scrollTop }
-        }));
+        const a = captureAnchor();
+        if (!a) return;
+        try {
+            localStorage.setItem(LS.lastEpic, epicKey);
+            localStorage.setItem(LS.pos(epicKey), JSON.stringify({
+                book: currentBookIndex,
+                flat: a.flat,
+                ratio: a.ratio
+            }));
+        } catch (e) {}
     }
     function loadPosition(key) {
         try { return JSON.parse(localStorage.getItem(LS.pos(key)) || 'null'); }
@@ -1006,59 +1661,131 @@ footer .sources { opacity: .85; }
 
     function onColScroll(e) {
         const col = e.currentTarget;
-        const max = col.scrollHeight - col.clientHeight;
-        progressBar.style.width = (max > 0 ? (col.scrollTop / max) * 100 : 0) + '%';
+        // 任何滚动都刷新进度与位置指示（跳转时三栏一起动，指示器仍需更新）
+        updateProgress();
+        clearTimeout(posTimer);
+        posTimer = setTimeout(updatePosIndicator, 80);
 
         if (isMobileLayout() || isJumping) return;
-        if (isSyncing && activeCol !== col) return;
+        // 同步过程中由其他栏被动产生的滚动，忽略，避免互相拉扯
+        if (isSyncing && activeCol && activeCol !== col) return;
         activeCol = col;
         isSyncing = true;
         syncCols(col);
         clearTimeout(syncTimer);
         syncTimer = setTimeout(() => { isSyncing = false; }, 60);
 
-        clearTimeout(col._bookTimer);
-        col._bookTimer = setTimeout(() => {
-            const b = detectBook(col);
-            if (b !== currentBookIndex) {
-                currentBookIndex = b;
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            updatePosIndicator();
+            const a = visibleAnchor(col);
+            if (a && flat[a.flat] && flat[a.flat].book !== currentBookIndex) {
+                currentBookIndex = flat[a.flat].book;
                 updateBookUI();
                 updateArrows();
             }
-        }, 140);
-
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(savePosition, 400);
+            savePosition();
+        }, 320);
     }
 
-    ['gr', 'zh', 'en'].forEach(lang => {
+    LANGS.forEach(lang => {
         cols[lang].addEventListener('mouseenter', () => { activeCol = cols[lang]; });
         cols[lang].addEventListener('touchstart', () => { activeCol = cols[lang]; }, { passive: true });
         cols[lang].addEventListener('scroll', onColScroll);
     });
+    cardCol.addEventListener('scroll', () => {
+        updateProgress();
+        clearTimeout(posTimer);
+        posTimer = setTimeout(updatePosIndicator, 80);
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            updatePosIndicator();
+            const a = visibleAnchor(cardCol);
+            if (a && flat[a.flat] && flat[a.flat].book !== currentBookIndex) {
+                currentBookIndex = flat[a.flat].book;
+                updateBookUI();
+                updateArrows();
+            }
+            savePosition();
+        }, 320);
+    });
 
-    /* ================= 行号跳转（卷内） ================= */
+    /* ================= 位置跳转 ================= */
+    const GREEK_BOOK_NUM = {
+        'Α':1,'Β':2,'Γ':3,'Δ':4,'Ε':5,'Ζ':6,'Η':7,'Θ':8,'Ι':9,'Κ':10,'Λ':11,'Μ':12,
+        'Ν':13,'Ξ':14,'Ο':15,'Π':16,'Ρ':17,'Σ':18,'Τ':19,'Υ':20,'Φ':21,'Χ':22,'Ψ':23,'Ω':24
+    };
+    function parseRef(str) {
+        let s = (str || '').trim();
+        if (!s) return null;
+        let epic = null;
+        const mEpic = s.match(/^(ἰλιάς|ιλ\.?|il\.?|iliad|ὀδύσσεια|οδ\.?|od\.?|odyssey)\s*[.:,]?\s*/i);
+        if (mEpic) {
+            const t = mEpic[1].toLowerCase();
+            epic = (t.indexOf('o') === 0 || t.indexOf('ο') === 0 || t.indexOf('ὀ') === 0) ? 'odyssey' : 'iliad';
+            s = s.slice(mEpic[0].length);
+        }
+        let book = null, rest = null;
+        const mg = s.match(/^([Α-Ωα-ω])\s*[.:,·\s]\s*(.*)$/);
+        if (mg && GREEK_BOOK_NUM[mg[1].toUpperCase()]) {
+            book = GREEK_BOOK_NUM[mg[1].toUpperCase()];
+            rest = mg[2];
+        } else {
+            const m2 = s.match(/^(\d+)\s*(?:[.:,·]\s*|\s+)(\d+)\s*$/);
+            if (m2) { book = +m2[1]; rest = m2[2]; }
+            else {
+                const m3 = s.match(/^(\d+)\s*$/);
+                if (m3) return { epic: epic, book: null, line: +m3[1] };
+                return null;
+            }
+        }
+        const mLine = (rest || '').match(/^(\d+)/);
+        if (!mLine) return null;
+        return { epic: epic, book: book, line: +mLine[1] };
+    }
+
     function executeLineJump() {
         if (!rawData) return;
-        let t = parseInt(lineInput.value, 10);
-        if (isNaN(t) || t <= 0) return;
-        const bookData = rawData.books[currentBookIndex];
-        const maxLine = bookData.pages[bookData.pages.length - 1].lines[1];
-        if (t > maxLine) { t = maxLine; lineInput.value = t; }
+        const parsed = parseRef(lineInput.value);
+        if (!parsed) { toast('无法识别，可试试 3.450 或 Γ 450'); return; }
 
-        suppressSync(() => {
-            enabledLangs().forEach(lang => {
-                const container = document.getElementById('sec-' + lang + '-' + currentBookIndex);
-                if (!container) return;
-                const blocks = Array.from(container.querySelectorAll('.verse-block'));
-                if (!blocks.length) return;
-                let target = blocks.find(b => t >= +b.dataset.start && t <= +b.dataset.end);
-                if (!target) target = blocks.find(b => +b.dataset.end >= t);
-                if (!target) target = blocks[blocks.length - 1];
-                cols[lang].scrollTo({ top: target.offsetTop - 18, behavior: 'smooth' });
-                flash(target);
+        // 引用了另一部史诗：直接切过去并在载入时定位，避免被「续读位置」覆盖
+        if (parsed.epic && parsed.epic !== epicKey) {
+            loadEpic(parsed.epic, { book: parsed.book, line: parsed.line });
+            lineInput.value = '';
+            return;
+        }
+
+        const bookIdx = (parsed.book === null || parsed.book === undefined)
+            ? currentBookIndex
+            : Math.min(Math.max(1, parsed.book), totalBooks) - 1;
+        const bookData = rawData.books[bookIdx];
+        if (!bookData) return;
+        const maxLine = bookData.pages[bookData.pages.length - 1].lines[1];
+        const target = Math.min(Math.max(1, parsed.line), maxLine);
+
+        if (bookIdx !== currentBookIndex) {
+            currentBookIndex = bookIdx;
+            updateBookUI();
+            updateArrows();
+        }
+        const targetFlat = flatForLine(bookIdx, target);
+        const rel = target - flat[targetFlat].start;
+        suppressSync(() => scrollToLine(targetFlat, rel));
+        flashFlat(targetFlat);
+        savePosition();
+    }
+
+    function flashFlat(idx) {
+        if (viewMode === 'cards') {
+            const el = blockAt(cardCol, idx);
+            if (el) flash(el);
+        } else {
+            enabledLangs().forEach(l => {
+                const el = blockAt(cols[l], idx);
+                if (el) flash(el);
             });
-        });
+        }
     }
     function flash(el) {
         if (!el) return;
@@ -1067,6 +1794,17 @@ footer .sources { opacity: .85; }
     }
 
     /* ================= 搜索 ================= */
+    const normCache = new Map();
+    function cachedNorm(book, page, lang) {
+        const k = book + ':' + page + ':' + lang;
+        let v = normCache.get(k);
+        if (v === undefined) {
+            const p = rawData.books[book].pages[page];
+            v = normFast(p[lang] == null ? '' : p[lang]);
+            normCache.set(k, v);
+        }
+        return v;
+    }
     function scopeLangs() {
         const s = $('search-scope').value;
         if (s === 'all') return enabledLangs();
@@ -1074,59 +1812,122 @@ footer .sources { opacity: .85; }
     }
     function ensureLangVisible(lang) {
         const cb = $('chk-' + lang);
-        if (!cb.checked) { cb.checked = true; updateLayout(); }
+        if (!cb.checked) {
+            cb.checked = true;
+            if (viewMode === 'cards') applyLangVisibility();
+            else buildFrames();
+        }
     }
-    function clearSearch() {
-        // 重新渲染之前被高亮过的块（去 mark）
-        if (searchQuery && rawData) {
-            searchResults.forEach(r => {
-                r.block.innerHTML = verseBlockInner(r.book, r.page, r.lang, '');
+    function rerenderFlat(idx, q) {
+        const f = flat[idx];
+        if (!f) return;
+        if (viewMode === 'cards') {
+            const el = blockAt(cardCol, idx);
+            if (el) el.innerHTML = cardInner(f.book, f.page, q);
+        } else {
+            LANGS.forEach(lang => {
+                const el = blockAt(cols[lang], idx);
+                if (el) el.innerHTML = verseBlockInner(f.book, f.page, lang, q);
             });
         }
+    }
+    function clearHighlights() {
+        highlighted.forEach(i => rerenderFlat(i, ''));
+        highlighted = [];
+    }
+    function clearSearch() {
+        clearHighlights();
         searchResults = [];
         searchIndex = -1;
         searchQuery = '';
         $('search-count').textContent = '';
+        const box = $('search-results');
+        box.hidden = true;
+        box.innerHTML = '';
     }
     function doSearch() {
+        clearHighlights();
         const q = $('search-input').value.trim();
-        // 先清除旧高亮
-        if (searchQuery && rawData) {
-            searchResults.forEach(r => { r.block.innerHTML = verseBlockInner(r.book, r.page, r.lang, ''); });
-        }
         searchResults = [];
         searchIndex = -1;
         searchQuery = q;
-        if (!q || !rawData) { $('search-count').textContent = ''; return; }
+        const box = $('search-results');
+        if (!q || !rawData) {
+            $('search-count').textContent = '';
+            box.hidden = true;
+            box.innerHTML = '';
+            return;
+        }
+        const qn = normKey(q);
+        if (!qn) { $('search-count').textContent = '请输入有效关键词'; return; }
 
         const langs = scopeLangs();
-        langs.forEach(lang => {
-            const col = cols[lang];
-            col.querySelectorAll('.verse-block').forEach(block => {
-                const book = +block.dataset.book;
-                const page = +block.dataset.page;
-                const text = rawData.books[book].pages[page][lang];
-                if (text.toLowerCase().indexOf(q.toLowerCase()) !== -1) {
-                    searchResults.push({ lang, book, page, block });
+        flat.forEach((f, i) => {
+            langs.forEach(lang => {
+                if (cachedNorm(f.book, f.page, lang).indexOf(qn) !== -1) {
+                    searchResults.push({ flat: i, lang: lang, book: f.book, page: f.page, start: f.start, end: f.end });
                 }
             });
         });
-        // 按文档顺序排序
-        searchResults.sort((a, b) => {
-            if (a.book !== b.book) return a.book - b.book;
-            if (a.page !== b.page) return a.page - b.page;
-            return ['gr','zh','en'].indexOf(a.lang) - ['gr','zh','en'].indexOf(b.lang);
-        });
 
-        // 给所有命中块加高亮
-        searchResults.forEach(r => { r.block.innerHTML = verseBlockInner(r.book, r.page, r.lang, q); });
+        const order = { gr: 0, zh: 1, en: 2 };
+        searchResults.sort((a, b) => (a.flat - b.flat) || (order[a.lang] - order[b.lang]));
 
+        const touched = new Set(searchResults.map(r => r.flat));
+        touched.forEach(i => { rerenderFlat(i, q); highlighted.push(i); });
+
+        renderResultList(q);
         if (searchResults.length) {
             searchIndex = 0;
             focusMatch(0);
         } else {
             $('search-count').textContent = '无结果';
         }
+    }
+    function snippetFor(r, q) {
+        const p = rawData.books[r.book].pages[r.page];
+        const text = (p[r.lang] || '').replace(/\n/g, ' ');
+        const qn = normKey(q);
+        const { norm, map } = normWithMap(text);
+        const at = norm.indexOf(qn);
+        if (at === -1) return escapeHtml(text.slice(0, 60));
+        const sIdx = map[at];
+        const eIdx = (at + qn.length < map.length) ? map[at + qn.length] : text.length;
+        const from = Math.max(0, sIdx - 34);
+        const to = Math.min(text.length, eIdx + 34);
+        return (from > 0 ? '…' : '') + escapeHtml(text.slice(from, sIdx)) +
+               '<mark>' + escapeHtml(text.slice(sIdx, eIdx)) + '</mark>' +
+               escapeHtml(text.slice(eIdx, to)) + (to < text.length ? '…' : '');
+    }
+    function renderResultList(q) {
+        const box = $('search-results');
+        if (!searchResults.length) { box.hidden = true; box.innerHTML = ''; return; }
+        const cap = 300;
+        const shown = searchResults.slice(0, cap);
+        let h = '';
+        shown.forEach((r, i) => {
+            h += '<button class="sr-item" type="button" data-i="' + i + '">' +
+                 '<span class="sr-loc">' + epicAbbr + ' ' + (r.book + 1) + '.' + r.start + '–' + r.end +
+                 ' · ' + SEG_LABEL[r.lang] + '</span>' +
+                 '<span class="sr-txt">' + snippetFor(r, q) + '</span></button>';
+        });
+        if (searchResults.length > cap) {
+            h += '<div class="sr-empty">共 ' + searchResults.length + ' 处，仅列出前 ' + cap + ' 条。</div>';
+        }
+        box.innerHTML = h;
+        box.hidden = false;
+        box.querySelectorAll('.sr-item').forEach(btn => {
+            btn.addEventListener('click', () => focusMatch(+btn.dataset.i));
+        });
+    }
+    function syncResultActive() {
+        const box = $('search-results');
+        if (box.hidden) return;
+        box.querySelectorAll('.sr-item').forEach((b, i) => {
+            b.classList.toggle('active', i === searchIndex);
+        });
+        const act = box.querySelector('.sr-item.active');
+        if (act && act.scrollIntoView) act.scrollIntoView({ block: 'nearest' });
     }
     function focusMatch(idx) {
         if (!searchResults.length) return;
@@ -1138,42 +1939,51 @@ footer .sources { opacity: .85; }
             updateBookUI();
             updateArrows();
         }
-        suppressSync(() => {
-            cols[r.lang].scrollTo({ top: r.block.offsetTop - 60, behavior: 'smooth' });
-        });
-        flash(r.block);
+        suppressSync(() => scrollToLine(r.flat, 0));
+        flashFlat(r.flat);
         $('search-count').textContent = (searchIndex + 1) + ' / ' + searchResults.length + ' 处';
+        syncResultActive();
+        savePosition();
     }
 
     /* ================= 设置 ================= */
     function applySettings() {
         root.style.setProperty('--font-size', $('setting-font-size').value + 'px');
+        root.style.setProperty('--font-size-gr', $('setting-font-size-gr').value + 'px');
         root.style.setProperty('--line-height', $('setting-line-height').value);
         root.style.setProperty('--font-zh', $('setting-font-zh').value);
+        root.style.setProperty('--font-gr', $('setting-font-gr').value);
         document.body.classList.toggle('hide-ln', !$('setting-show-ln').checked);
-        localStorage.setItem(LS.settings, JSON.stringify({
-            fontSize: $('setting-font-size').value,
-            lineHeight: $('setting-line-height').value,
-            fontZh: $('setting-font-zh').value,
-            showLn: $('setting-show-ln').checked
-        }));
+        try {
+            localStorage.setItem(LS.settings, JSON.stringify({
+                fontSize: $('setting-font-size').value,
+                fontSizeGr: $('setting-font-size-gr').value,
+                lineHeight: $('setting-line-height').value,
+                fontZh: $('setting-font-zh').value,
+                fontGr: $('setting-font-gr').value,
+                showLn: $('setting-show-ln').checked
+            }));
+        } catch (e) {}
     }
     function loadSettings() {
         let s = null;
         try { s = JSON.parse(localStorage.getItem(LS.settings) || 'null'); } catch (e) {}
-        if (!s) return;
-        if (s.fontSize) $('setting-font-size').value = s.fontSize;
-        if (s.lineHeight) $('setting-line-height').value = s.lineHeight;
-        if (s.fontZh) $('setting-font-zh').value = s.fontZh;
-        if (typeof s.showLn === 'boolean') $('setting-show-ln').checked = s.showLn;
+        if (s) {
+            if (s.fontSize) $('setting-font-size').value = s.fontSize;
+            if (s.fontSizeGr) $('setting-font-size-gr').value = s.fontSizeGr;
+            if (s.lineHeight) $('setting-line-height').value = s.lineHeight;
+            if (s.fontZh) $('setting-font-zh').value = s.fontZh;
+            if (s.fontGr) $('setting-font-gr').value = s.fontGr;
+            if (typeof s.showLn === 'boolean') $('setting-show-ln').checked = s.showLn;
+        }
         applySettings();
     }
 
     /* ================= 主题 ================= */
     function setTheme(dark) {
         root.dataset.theme = dark ? 'dark' : 'light';
-        localStorage.setItem(LS.theme, dark ? 'dark' : 'light');
-        $('btn-theme').textContent = dark ? '☀️' : '🌙';
+        try { localStorage.setItem(LS.theme, dark ? 'dark' : 'light'); } catch (e) {}
+        $('btn-theme').textContent = dark ? '日间' : '夜间';
         $('btn-theme').title = dark ? '切换日间模式' : '切换夜间模式';
     }
     function initTheme() {
@@ -1182,7 +1992,67 @@ footer .sources { opacity: .85; }
         setTheme(saved ? saved === 'dark' : prefersDark);
     }
 
-    /* ================= 键盘快捷键 ================= */
+    /* ================= 结构变化（断点切换） ================= */
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        if (!rawData) return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const m = mode();
+            if (m === viewMode) return;
+            const anchor = captureAnchor();
+            viewMode = m;
+            renderContent(searchQuery);
+            buildFrames();
+            requestAnimationFrame(() => {
+                restoreAnchor(anchor);
+                updateProgress();
+                updatePosIndicator();
+            });
+            if (searchQuery) { doSearch(); }
+        }, 160);
+    });
+
+    /* ================= 打印 ================= */
+    let printPrevMode = null, printPrevAnchor = null;
+    function markPrintBook() {
+        document.querySelectorAll('.section-block').forEach(sec => {
+            sec.classList.toggle('print-current', +sec.dataset.book === currentBookIndex);
+        });
+    }
+    window.addEventListener('beforeprint', () => {
+        if (!rawData) return;
+        // 打印时切到按段卡片：同一段落三语相邻，比整卷分段更好用，页数也少得多
+        if (viewMode !== 'cards') {
+            printPrevMode = viewMode;
+            printPrevAnchor = captureAnchor();
+            viewMode = 'cards';
+            renderContent(searchQuery);
+            buildFrames();
+        }
+        markPrintBook();
+    });
+    window.addEventListener('afterprint', () => {
+        if (!rawData || !printPrevMode) return;
+        viewMode = printPrevMode;
+        printPrevMode = null;
+        renderContent(searchQuery);
+        buildFrames();
+        requestAnimationFrame(() => restoreAnchor(printPrevAnchor));
+    });
+
+    /* ================= 键盘 ================= */
+    function jumpParagraph(dir) {
+        const c = activeContainer();
+        if (!c) return;
+        const a = visibleAnchor(c);
+        if (!a) return;
+        let target = a.flat + dir;
+        if (a.ratio < 0.02 && dir < 0) target = a.flat - 1;
+        target = Math.min(Math.max(0, target), flat.length - 1);
+        suppressSync(() => scrollToFlat(target, 12), 400);
+        savePosition();
+    }
     document.addEventListener('keydown', (e) => {
         if (readerView.hidden) return;
         const tag = document.activeElement && document.activeElement.tagName;
@@ -1190,7 +2060,9 @@ footer .sources { opacity: .85; }
 
         if (e.key === 'Escape') {
             if (!$('search-panel').hidden) { $('search-panel').hidden = true; clearSearch(); }
-            if (!$('settings-panel').hidden) { $('settings-panel').hidden = true; }
+            if (!$('settings-panel').hidden) $('settings-panel').hidden = true;
+            const more = $('hdr-more');
+            if (more.classList.contains('open')) { more.classList.remove('open'); $('btn-more').setAttribute('aria-expanded', 'false'); }
             return;
         }
         if (typing) {
@@ -1201,14 +2073,26 @@ footer .sources { opacity: .85; }
                 } else {
                     doSearch();
                 }
-            } else if (e.key === 'Enter' && document.activeElement === $('line-input')) {
-                executeLineJump();
+            }
+            return;
+        }
+        if (e.metaKey || e.ctrlKey) {
+            if (e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                $('search-panel').hidden = false;
+                $('search-input').focus();
             }
             return;
         }
         if (e.key === 'ArrowLeft') { e.preventDefault(); goToBook(currentBookIndex - 1); }
         else if (e.key === 'ArrowRight') { e.preventDefault(); goToBook(currentBookIndex + 1); }
-        else if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f')) {
+        else if (e.key === 'j') { e.preventDefault(); jumpParagraph(1); }
+        else if (e.key === 'k') { e.preventDefault(); jumpParagraph(-1); }
+        else if (e.key === 'J') { e.preventDefault(); jumpParagraph(3); }
+        else if (e.key === 'K') { e.preventDefault(); jumpParagraph(-3); }
+        else if (e.key === 'g') { e.preventDefault(); goToBook(0); }
+        else if (e.key === 'G') { e.preventDefault(); goToBook(totalBooks - 1); }
+        else if (e.key === '/') {
             e.preventDefault();
             $('search-panel').hidden = false;
             $('search-input').focus();
@@ -1221,28 +2105,71 @@ footer .sources { opacity: .85; }
         homeView.hidden = false;
         document.title = '荷马史诗 · 三语对读';
         renderHome();
+        window.scrollTo(0, 0);
     });
     bookSelect.addEventListener('change', (e) => goToBook(parseInt(e.target.value, 10)));
     navLeft.addEventListener('click', () => goToBook(currentBookIndex - 1));
     navRight.addEventListener('click', () => goToBook(currentBookIndex + 1));
     $('btn-jump').addEventListener('click', executeLineJump);
-    lineInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); });
-    lineInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') executeLineJump(); });
+    lineInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9A-Za-z.:·\s\u0391-\u03C9\u1F00-\u1FFF]/g, '');
+    });
+    lineInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); executeLineJump(); } });
 
-    document.querySelectorAll('.lang-cb').forEach(cb => cb.addEventListener('change', updateLayout));
+    document.querySelectorAll('.lang-cb').forEach(cb => cb.addEventListener('change', () => {
+        normalizeWeights();
+        const anchor = captureAnchor();
+        if (!enabledLangs().length) {
+            $('chk-' + LANGS[0]).checked = true;
+        }
+        if (viewMode === 'cards') {
+            applyLangVisibility();
+        } else {
+            buildFrames();
+            requestAnimationFrame(() => restoreAnchor(anchor));
+        }
+        if (searchQuery) doSearch();
+        savePosition();
+    }));
+
+    // 复制引用
+    readingArea.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-act="cite"]');
+        if (!btn) return;
+        const block = btn.closest('[data-flat]');
+        if (!block) return;
+        const f = flat[+block.dataset.flat];
+        if (!f) return;
+        const range = f.start === f.end ? String(f.start) : f.start + '–' + f.end;
+        copyText(epicAbbr + ' ' + (f.book + 1) + '.' + range);
+    });
+
+    $('btn-more').addEventListener('click', () => {
+        const more = $('hdr-more');
+        const open = more.classList.toggle('open');
+        $('btn-more').setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
 
     $('btn-search').addEventListener('click', () => {
         const p = $('search-panel');
         p.hidden = !p.hidden;
         if (!p.hidden) $('search-input').focus();
     });
+    $('search-input').addEventListener('input', (e) => {
+        if (!e.target.value.trim()) clearSearch();
+    });
     $('btn-search-go').addEventListener('click', doSearch);
     $('btn-search-next').addEventListener('click', () => focusMatch(searchIndex + 1));
     $('btn-search-prev').addEventListener('click', () => focusMatch(searchIndex - 1));
-    $('btn-search-clear').addEventListener('click', () => { $('search-input').value = ''; clearSearch(); $('search-input').focus(); });
+    $('btn-search-clear').addEventListener('click', () => {
+        $('search-input').value = '';
+        clearSearch();
+        $('search-input').focus();
+    });
     $('search-input').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); focusMatch(searchIndex - 1); }
     });
+    $('search-scope').addEventListener('change', () => { if (searchQuery || $('search-input').value.trim()) doSearch(); });
 
     $('btn-settings').addEventListener('click', () => {
         const p = $('settings-panel');
@@ -1250,24 +2177,36 @@ footer .sources { opacity: .85; }
     });
     $('btn-theme').addEventListener('click', () => setTheme(root.dataset.theme !== 'dark'));
     $('setting-font-size').addEventListener('input', applySettings);
+    $('setting-font-size-gr').addEventListener('input', applySettings);
     $('setting-line-height').addEventListener('input', applySettings);
     $('setting-font-zh').addEventListener('change', applySettings);
+    $('setting-font-gr').addEventListener('change', applySettings);
     $('setting-show-ln').addEventListener('change', applySettings);
 
-    // 点击设置面板外部关闭
     document.addEventListener('click', (e) => {
         const sp = $('settings-panel');
         if (!sp.hidden && !sp.contains(e.target) && e.target !== $('btn-settings') && !$('btn-settings').contains(e.target)) {
             sp.hidden = true;
         }
+        const more = $('hdr-more');
+        if (more.classList.contains('open') &&
+            !more.contains(e.target) &&
+            !$('btn-more').contains(e.target)) {
+            more.classList.remove('open');
+            $('btn-more').setAttribute('aria-expanded', 'false');
+        }
     });
 
     /* ================= 启动 ================= */
+    try {
+        const w = JSON.parse(localStorage.getItem(LS.weights) || 'null');
+        if (w && typeof w === 'object') {
+            LANGS.forEach(l => { if (typeof w[l] === 'number' && w[l] > 0) weights[l] = w[l]; });
+        }
+    } catch (e) {}
     initTheme();
     loadSettings();
     renderHome();
-
-    // 若上次读过，首页可一键续读（首页卡片已显示提示）
 })();
 </script>
 </body>
