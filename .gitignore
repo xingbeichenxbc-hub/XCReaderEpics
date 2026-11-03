@@ -1,0 +1,5 @@
+# macOS
+.DS_Store
+
+# 本地临时构建产物（如需忽略可自行添加）
+*.local.html

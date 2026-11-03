@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>史诗阅读器 - XC</title>
+    <style>
+        :root {
+            --font-size: 16px;
+            --line-height: 1.8;
+            --font-family-zh: "PingFang SC", "Microsoft YaHei", sans-serif;
+            --font-family-en: "Georgia", serif;
+            --font-family-gr: "Palatino Linotype", "Times New Roman", serif;
+            --bg-color: #fcfaf8;
+            --text-color: #333;
+            --accent-color: #2c3e50;
+            --resizer-color: #e0e0e0;
+            --resizer-active: #3498db;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family-zh);
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---------------- 一级页面：文件上传区 ---------------- */
+        #upload-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .upload-box {
+            width: 80%;
+            max-width: 600px;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px dashed #3498db;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-box.dragover {
+            background: #e8f4fd;
+            border-color: #2980b9;
+            transform: scale(1.02);
+        }
+
+        .upload-box h2 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 24px;
+        }
+
+        .upload-box p { color: #7f8c8d; font-size: 16px; margin-bottom: 20px; line-height: 1.6;}
+        .upload-box input[type="file"] { display: none; }
+
+        .btn-upload {
+            background: #3498db;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-upload:hover { background: #2980b9; }
+
+        /* ---------------- 二级页面：阅读区 ---------------- */
+        #reader-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        header {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 12px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s, border-color 0.3s;
+            font-size: 14px;
+            outline: none;
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        select, input[type="text"], input[type="number"], button {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input[type="text"] { width: 85px; }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #2980b9; }
+
+        .settings-btn {
+            background-color: transparent;
+            border: 1px solid white;
+        }
+        .settings-btn:hover { background-color: rgba(255,255,255,0.1); }
+
+        main {
+            flex: 1 1 auto;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .col {
+            flex: 1 1 0;
+            overflow-y: auto;
+            padding: 20px 30px 60px 30px;
+            background: white;
+            font-size: var(--font-size);
+            line-height: var(--line-height);
+            min-width: 200px;
+            scroll-behavior: auto;
+            position: relative;
+        }
+
+        .resizer {
+            flex: 0 0 6px;
+            background-color: var(--resizer-color);
+            cursor: col-resize;
+            transition: background 0.2s;
+            z-index: 5;
+        }
+        .resizer:hover, .resizer.active { background-color: var(--resizer-active); }
+
+        #col-gr { font-family: var(--font-family-gr); }
+        #col-en { font-family: var(--font-family-en); }
+        #col-zh { font-family: var(--font-family-zh); text-align: justify; }
+
+        /* 内容排版 */
+        .section-block { margin-bottom: 60px; }
+
+        .section-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--accent-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            margin-top: 20px;
+            position: sticky;
+            top: -20px;
+            background: rgba(255,255,255,0.95);
+            z-index: 5;
+        }
+
+        .verse-block {
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 3px solid #ecf0f1;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .verse-block:hover { border-left-color: #3498db; }
+        .verse-block.highlight {
+            background-color: #fff9c4;
+            border-left-color: #f1c40f;
+        }
+
+        .line-range {
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .text-part { margin-bottom: 10px; }
+
+        /* 斑马线底纹样式 (古希腊文/中文) */
+        .zebra-stripes .text-line {
+            padding: 0 6px; /* 左右留点边距让高亮不贴字 */
+            margin: 0 -6px; /* 负边距抵消 padding，保持整体排版对齐 */
+            border-radius: 3px;
+            min-height: 1.5em; /* 防止空行塌陷 */
+        }
+        .zebra-stripes .text-line:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.035); /* 极其微弱的浅灰色底纹 */
+        }
+
+        /* 悬浮设置面板 */
+        .settings-panel {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            padding: 20px;
+            color: #333;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid #eee;
+            min-width: 250px;
+        }
+        .settings-panel label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        /* 底部信息 */
+        footer {
+            flex: 0 0 auto;
+            background: var(--accent-color);
+            color: #ccc;
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+            border-top: 1px solid #1a252f;
+            line-height: 1.6;
+        }
+
+        /* -------------- 悬浮箭头 ---------------- */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 50;
+            border-radius: 6px;
+            transition: background 0.3s, color 0.3s, opacity 0.3s;
+            user-select: none;
+        }
+
+        .nav-arrow:hover {
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+        }
+
+        #nav-left { left: 15px; }
+        #nav-right { right: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 文件上传视图 -->
+    <div id="upload-view">
+        <div class="upload-box" id="drop-zone">
+            <h2>欢迎使用 XC 史诗阅读器</h2>
+            <p>请将 JSON 文件（如《伊利亚特》《奥德赛》）拖拽至此处<br>或点击下方按钮选择文件</p>
+            <button class="btn-upload" onclick="document.getElementById('file-input').click()">选择本地文件</button>
+            <input type="file" id="file-input" accept=".json" />
+        </div>
+    </div>
+
+    <!-- 2. 阅读器视图 -->
+    <div id="reader-view">
+        <header>
+            <button class="btn-back" id="btn-back" title="返回上传页">
+                &#10094; 返回
+            </button>
+
+            <div class="control-group">
+                <label for="book-select">卷数:</label>
+                <select id="book-select"></select>
+            </div>
+
+            <div class="control-group" title="在当前卷内进行行数跳转">
+                <label for="line-input">行号跳转:</label>
+                <input type="text" id="line-input" placeholder="例如: 150" autocomplete="off" />
+                <button id="btn-jump">跳转</button>
+            </div>
+
+            <div class="control-group">
+                <!-- 调整了复选框的顺序 -->
+                <label><input type="checkbox" id="chk-gr" class="lang-cb" checked> 古希腊文</label>
+                <label><input type="checkbox" id="chk-zh" class="lang-cb" checked> 中文</label>
+                <label><input type="checkbox" id="chk-en" class="lang-cb" checked> 英文</label>
+            </div>
+
+            <div style="margin-left: auto;">
+                <button class="settings-btn" id="btn-settings">阅读设置 ⚙</button>
+            </div>
+        </header>
+
+        <div id="settings-panel" class="settings-panel">
+            <label>
+                字号 (px):
+                <input type="number" id="setting-font-size" value="16" min="12" max="36" />
+            </label>
+            <label>
+                行距:
+                <input type="number" id="setting-line-height" value="1.8" step="0.1" min="1.0" max="3.0" />
+            </label>
+            <label>
+                中文字体:
+                <select id="setting-font-zh">
+                    <option value="'PingFang SC', 'Microsoft YaHei', sans-serif">系统无衬线</option>
+                    <option value="'SimSun', 'STSong', serif">宋体 (衬线)</option>
+                    <option value="'Kaiti', 'STKaiti', serif">楷体</option>
+                </select>
+            </label>
+            <button id="btn-close-settings" style="width: 100%; margin-top: 5px;">关闭</button>
+        </div>
+
+        <main id="reading-area">
+            <!-- 左右悬浮箭头 -->
+            <div id="nav-left" class="nav-arrow" title="上一卷 (左方向键)">&#10094;</div>
+            <div id="nav-right" class="nav-arrow" title="下一卷 (右方向键)">&#10095;</div>
+            
+            <!-- JS 动态注入阅读列和可拖拽条 -->
+        </main>
+
+        <footer>
+            &copy; 史诗阅读器 | XC 专属版本<br>
+            XClassics Readers v.0.0.1 仅供内部学习测试用，请勿扩散传播。
+        </footer>
+    </div>
+
+    <script>
+        let rawData = null;
+        let currentBookIndex = 0;
+        let totalBooks = 0;
+
+        // 全局存储列的引用
+        const cols = {
+            gr: document.createElement('div'),
+            zh: document.createElement('div'), // 调整对象逻辑顺序便于管理
+            en: document.createElement('div')
+        };
+        cols.gr.id = 'col-gr'; cols.gr.className = 'col';
+        cols.zh.id = 'col-zh'; cols.zh.className = 'col';
+        cols.en.id = 'col-en'; cols.en.className = 'col';
+
+        const uploadView = document.getElementById('upload-view');
+        const readerView = document.getElementById('reader-view');
+        const readingArea = document.getElementById('reading-area');
+        const bookSelect = document.getElementById('book-select');
+        const navLeft = document.getElementById('nav-left');
+        const navRight = document.getElementById('nav-right');
+        const btnBack = document.getElementById('btn-back');
+
+        // ==================== 返回一级页面 ====================
+        btnBack.addEventListener('click', () => {
+            readerView.style.display = 'none';
+            uploadView.style.display = 'flex';
+            document.title = "史诗阅读器 - XC";
+        });
+
+        // ==================== 文件上传逻辑 ====================
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    initReader(data);
+                } catch (err) {
+                    alert('JSON解析失败，请确保文件格式正确！');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==================== 阅读器初始化 ====================
+        function initReader(data) {
+            rawData = data;
+            totalBooks = rawData.books.length;
+            currentBookIndex = 0;
+
+            // 设置页面标题
+            const zhTitle = rawData.title || rawData.title_zh || "未知史诗";
+            document.title = `${rawData.author}《${zhTitle}》 - XC`;
+
+            // 隐藏上传区，显示阅读区
+            uploadView.style.display = 'none';
+            readerView.style.display = 'flex';
+
+            // 清空旧数据
+            bookSelect.innerHTML = '';
+            cols.gr.innerHTML = '';
+            cols.zh.innerHTML = '';
+            cols.en.innerHTML = '';
+
+            // 解析并渲染文本 (史诗按 books -> pages 结构层级)
+            rawData.books.forEach((book, bIdx) => {
+                const opt = document.createElement('option');
+                opt.value = bIdx;
+                opt.textContent = `第 ${book.book} 卷：${book.title_zh}`;
+                bookSelect.appendChild(opt);
+
+                const sGr = document.createElement('div'); sGr.className = 'section-block'; sGr.id = `sec-gr-${bIdx}`;
+                const sZh = document.createElement('div'); sZh.className = 'section-block'; sZh.id = `sec-zh-${bIdx}`;
+                const sEn = document.createElement('div'); sEn.className = 'section-block'; sEn.id = `sec-en-${bIdx}`;
+
+                const titleHtml = `<div class="section-title">Book ${book.book} - ${book.title_zh}</div>`;
+                sGr.innerHTML = titleHtml;
+                sZh.innerHTML = titleHtml;
+                sEn.innerHTML = titleHtml;
+
+                if (book.pages) {
+                    book.pages.forEach((page, pIdx) => {
+                        const startLine = page.lines[0];
+                        const endLine = page.lines[1];
+
+                        // 辅助函数：将纯文本中的换行符转换为<br>进行排版 (供英文非斑马线使用)
+                        const formatTextNormal = (text) => {
+                            if (!text) return '';
+                            return Array.isArray(text) ? text.join('<br>') : text.replace(/\n/g, '<br>');
+                        };
+
+                        const createVerseBlock = (lang, text) => {
+                            const d = document.createElement('div');
+                            d.className = 'verse-block';
+                            d.dataset.start = startLine;
+                            d.dataset.end = endLine;
+                            d.dataset.book = bIdx;
+                            
+                            let html = `<div class="line-range">[ 行 ${startLine} - ${endLine} ]</div>`;
+                            if (text) {
+                                // 如果是希腊文或中文，则拆分行添加斑马底纹类
+                                if (lang === 'gr' || lang === 'zh') {
+                                    let lines = Array.isArray(text) ? text : text.split('\n');
+                                    let textHtml = lines.map(line => `<div class="text-line">${line || '<br>'}</div>`).join('');
+                                    html += `<div class="text-part zebra-stripes">${textHtml}</div>`;
+                                } else {
+                                    // 英文保持原状
+                                    html += `<div class="text-part">${formatTextNormal(text)}</div>`;
+                                }
+                            }
+                            d.innerHTML = html;
+                            return d;
+                        };
+
+                        sGr.appendChild(createVerseBlock('gr', page.gr));
+                        sZh.appendChild(createVerseBlock('zh', page.zh));
+                        sEn.appendChild(createVerseBlock('en', page.en));
+                    });
+                }
+
+                cols.gr.appendChild(sGr);
+                cols.zh.appendChild(sZh);
+                cols.en.appendChild(sEn);
+            });
+
+            updateLayout();
+            updateArrows();
+        }
+
+        // ==================== 语言列布局与拖拽 ====================
+        function updateLayout() {
+            if (!rawData) return;
+            const showGr = document.getElementById('chk-gr').checked;
+            const showZh = document.getElementById('chk-zh').checked;
+            const showEn = document.getElementById('chk-en').checked;
+
+            const leftArrow = document.getElementById('nav-left');
+            const rightArrow = document.getElementById('nav-right');
+            readingArea.innerHTML = '';
+            readingArea.appendChild(leftArrow);
+            readingArea.appendChild(rightArrow);
+            
+            const visibleCols = [];
+            // 按期望的显示顺序 Push (古希腊文 -> 中文 -> 英文)
+            if (showGr) { cols.gr.style.flex = "1 1 0"; visibleCols.push(cols.gr); }
+            if (showZh) { cols.zh.style.flex = "1 1 0"; visibleCols.push(cols.zh); }
+            if (showEn) { cols.en.style.flex = "1 1 0"; visibleCols.push(cols.en); }
+
+            visibleCols.forEach((col, index) => {
+                readingArea.appendChild(col);
+                if (index < visibleCols.length - 1) {
+                    const resizer = document.createElement('div');
+                    resizer.className = 'resizer';
+                    resizer.addEventListener('mousedown', initDrag);
+                    readingArea.appendChild(resizer);
+                }
+            });
+        }
+
+        document.querySelectorAll('.lang-cb').forEach(cb => {
+            cb.addEventListener('change', updateLayout);
+        });
+
+        let isResizing = false;
+        let currentResizer = null;
+
+        function initDrag(e) {
+            isResizing = true;
+            currentResizer = e.target;
+            currentResizer.classList.add('active');
+            document.body.style.cursor = 'col-resize';
+            document.querySelectorAll('.col').forEach(c => c.style.pointerEvents = 'none');
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing || !currentResizer) return;
+            const prevCol = currentResizer.previousElementSibling;
+            const nextCol = currentResizer.nextElementSibling;
+            if (!prevCol || !nextCol) return;
+
+            const containerWidth = readingArea.clientWidth;
+            const prevRect = prevCol.getBoundingClientRect();
+            const nextRect = nextCol.getBoundingClientRect();
+            const totalWidth = prevRect.width + nextRect.width;
+
+            let newPrevWidth = e.clientX - prevRect.left;
+            let newNextWidth = totalWidth - newPrevWidth;
+
+            if (newPrevWidth > 150 && newNextWidth > 150) {
+                const prevPct = (newPrevWidth / containerWidth) * 100;
+                const nextPct = (newNextWidth / containerWidth) * 100;
+                prevCol.style.flex = `0 0 ${prevPct}%`;
+                nextCol.style.flex = `0 0 ${nextPct}%`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                if (currentResizer) currentResizer.classList.remove('active');
+                currentResizer = null;
+                document.body.style.cursor = '';
+                document.querySelectorAll('.col').forEach(c => c.style.pointerEvents = '');
+            }
+        });
+
+        // ==================== 卷数跳转与导航 ====================
+        let isJumping = false;
+        let jumpTimeout;
+        
+        function goToBook(index) {
+            if (!rawData || index < 0 || index >= totalBooks) return;
+            currentBookIndex = parseInt(index);
+            bookSelect.value = currentBookIndex;
+            updateArrows();
+
+            triggerScrollJump(() => {
+                ['gr', 'zh', 'en'].forEach(lang => {
+                    if (!document.getElementById(`chk-${lang}`).checked) return;
+                    const secBlock = document.getElementById(`sec-${lang}-${currentBookIndex}`);
+                    if (secBlock && cols[lang]) {
+                        cols[lang].scrollTo({
+                            top: secBlock.offsetTop, 
+                            behavior: 'smooth' 
+                        });
+                    }
+                });
+            });
+        }
+
+        function updateArrows() {
+            navLeft.style.display = currentBookIndex > 0 ? 'flex' : 'none';
+            navRight.style.display = currentBookIndex < totalBooks - 1 ? 'flex' : 'none';
+        }
+
+        bookSelect.addEventListener('change', (e) => goToBook(e.target.value));
+        navLeft.addEventListener('click', () => goToBook(currentBookIndex - 1));
+        navRight.addEventListener('click', () => goToBook(currentBookIndex + 1));
+
+        document.addEventListener('keydown', (e) => {
+            if (readerView.style.display === 'none') return;
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goToBook(currentBookIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                goToBook(currentBookIndex + 1);
+            }
+        });
+
+        // ==================== 同步滚动逻辑 ====================
+        let isSyncing = false;
+        let activeCol = null;
+        let syncTimer;
+
+        function detectCurrentBook(col) {
+            const blocks = col.querySelectorAll('.section-block');
+            const colScrollTop = col.scrollTop;
+            
+            for (let i = 0; i < blocks.length; i++) {
+                if (blocks[i].offsetTop > colScrollTop + 150) {
+                    return Math.max(0, i - 1);
+                }
+            }
+            return blocks.length - 1; 
+        }
+
+        function syncCols(sourceCol) {
+            const langs = ['gr', 'zh', 'en'].filter(l => document.getElementById(`chk-${l}`).checked);
+            if (langs.length <= 1) return;
+
+            const sourceLang = sourceCol.id.replace('col-', '');
+            const scrollTop = sourceCol.scrollTop;
+            
+            const sourceVerses = sourceCol.querySelectorAll('.verse-block');
+            if (sourceVerses.length === 0) return;
+
+            let currentIndex = -1;
+            for (let i = 0; i < sourceVerses.length; i++) {
+                if (sourceVerses[i].offsetTop <= scrollTop + 10) { 
+                    currentIndex = i;
+                } else {
+                    break;
+                }
+            }
+
+            langs.forEach(lang => {
+                if (lang === sourceLang) return;
+                const targetCol = cols[lang];
+                const targetVerses = targetCol.querySelectorAll('.verse-block');
+                if (targetVerses.length === 0) return;
+
+                let progress = 0;
+                let targetScrollTop = 0;
+
+                if (currentIndex === -1) {
+                    const endY = sourceVerses[0].offsetTop;
+                    progress = endY > 0 ? scrollTop / endY : 0;
+                    const tEndY = targetVerses[0].offsetTop;
+                    targetScrollTop = progress * tEndY;
+                } else {
+                    const currentVerse = sourceVerses[currentIndex];
+                    const nextVerse = sourceVerses[currentIndex + 1];
+                    const startY = currentVerse.offsetTop;
+                    
+                    const endY = nextVerse ? nextVerse.offsetTop : (currentVerse.offsetTop + currentVerse.offsetHeight);
+                    const range = endY - startY;
+                    
+                    progress = range > 0 ? (scrollTop - startY) / range : 0;
+
+                    const tCurrent = targetVerses[currentIndex];
+                    if (tCurrent) {
+                        const tNext = targetVerses[currentIndex + 1];
+                        const tStartY = tCurrent.offsetTop;
+                        const tEndY = tNext ? tNext.offsetTop : (tCurrent.offsetTop + tCurrent.offsetHeight);
+                        const tRange = tEndY - tStartY;
+                        
+                        targetScrollTop = tStartY + progress * tRange;
+                    }
+                }
+                
+                targetCol.scrollTop = targetScrollTop;
+            });
+        }
+
+        ['gr', 'zh', 'en'].forEach(lang => {
+            cols[lang].addEventListener('mouseenter', () => { activeCol = cols[lang]; });
+            cols[lang].addEventListener('touchstart', () => { activeCol = cols[lang]; });
+
+            cols[lang].addEventListener('scroll', (e) => {
+                if (isJumping) return; 
+
+                // --- 1. 同步滚动 ---
+                if (isSyncing && activeCol !== cols[lang]) return;
+                activeCol = cols[lang];
+                isSyncing = true;
+                
+                syncCols(cols[lang]);
+                
+                clearTimeout(syncTimer);
+                syncTimer = setTimeout(() => {
+                    isSyncing = false;
+                    activeCol = null;
+                }, 50);
+
+                // --- 2. 侦测更新下拉框卷数 ---
+                clearTimeout(cols[lang].sectionTimer);
+                cols[lang].sectionTimer = setTimeout(() => {
+                    const detectedBook = detectCurrentBook(cols[lang]);
+                    if (detectedBook !== currentBookIndex) {
+                        currentBookIndex = detectedBook;
+                        bookSelect.value = currentBookIndex;
+                        updateArrows();
+                    }
+                }, 100);
+            });
+        });
+
+        // ==================== 行数跳转逻辑 (卷内跳转机制) ====================
+        const lineInput = document.getElementById('line-input');
+        const btnJump = document.getElementById('btn-jump');
+
+        lineInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        lineInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') executeLineJump();
+        });
+        btnJump.addEventListener('click', executeLineJump);
+
+        function triggerScrollJump(action) {
+            isJumping = true;
+            clearTimeout(jumpTimeout);
+            action();
+            jumpTimeout = setTimeout(() => { isJumping = false; }, 850);
+        }
+
+        function executeLineJump() {
+            if (!rawData) return;
+            let targetLine = parseInt(lineInput.value);
+            // 只接受正整数
+            if (isNaN(targetLine) || targetLine <= 0) return;
+
+            triggerScrollJump(() => {
+                const currentBookData = rawData.books[currentBookIndex];
+                if (!currentBookData || !currentBookData.pages || currentBookData.pages.length === 0) return;
+
+                // 探测当前卷的最大行数
+                const lastPage = currentBookData.pages[currentBookData.pages.length - 1];
+                const maxLine = lastPage.lines[1];
+
+                // 逻辑：如果输入行数大于当前卷最大行数，则将其修正为最大行数（跳转至卷末）
+                if (targetLine > maxLine) {
+                    targetLine = maxLine;
+                    lineInput.value = targetLine; // 同步更新输入框提示用户
+                }
+
+                // 在三栏中分别执行卷内的局部跳转
+                ['gr', 'zh', 'en'].forEach(lang => {
+                    if (!document.getElementById(`chk-${lang}`).checked) return;
+                    
+                    // 限定只在当前卷内搜索，确保真正的“当前卷行数跳转”
+                    const bookContainer = document.getElementById(`sec-${lang}-${currentBookIndex}`);
+                    if (!bookContainer) return;
+
+                    const blocks = Array.from(bookContainer.querySelectorAll('.verse-block'));
+                    if (blocks.length === 0) return;
+
+                    // 查找包含该行号的区块：targetLine 在 block的 start 和 end 之间
+                    let targetBlock = blocks.find(b => targetLine >= parseInt(b.dataset.start) && targetLine <= parseInt(b.dataset.end));
+                    
+                    // 如果存在落差缺口，向下兼容找距离最近的区块
+                    if (!targetBlock) {
+                        targetBlock = blocks.find(b => parseInt(b.dataset.end) >= targetLine);
+                    }
+                    if (!targetBlock) {
+                        targetBlock = blocks[blocks.length - 1];
+                    }
+
+                    if (targetBlock) {
+                        // 留出 20px 顶部间距更美观
+                        cols[lang].scrollTo({ top: targetBlock.offsetTop - 20, behavior: 'smooth' });
+                        highlightElement(targetBlock);
+                    }
+                });
+            });
+        }
+
+        function highlightElement(el) {
+            if (!el) return;
+            el.classList.add('highlight');
+            setTimeout(() => { el.classList.remove('highlight'); }, 1500);
+        }
+
+        // ==================== 设置面板 ====================
+        const btnSettings = document.getElementById('btn-settings');
+        const pnlSettings = document.getElementById('settings-panel');
+        const btnCloseSettings = document.getElementById('btn-close-settings');
+        const root = document.documentElement;
+
+        btnSettings.addEventListener('click', () => {
+            pnlSettings.style.display = pnlSettings.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        btnCloseSettings.addEventListener('click', () => { pnlSettings.style.display = 'none'; });
+
+        document.getElementById('setting-font-size').addEventListener('input', (e) => {
+            root.style.setProperty('--font-size', e.target.value + 'px');
+        });
+        document.getElementById('setting-line-height').addEventListener('input', (e) => {
+            root.style.setProperty('--line-height', e.target.value);
+        });
+        document.getElementById('setting-font-zh').addEventListener('change', (e) => {
+            root.style.setProperty('--font-family-zh', e.target.value);
+        });
+    </script>
+</body>
+</html>
